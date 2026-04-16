@@ -1,0 +1,72 @@
+{% extends 'base_auth.html' %}
+
+{% block title %}Iniciar sesión — PokeTrip{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+  <!-- Hero izquierda -->
+  <div class="auth-hero">
+    <h1 class="auth-hero__title">Tu viaje,<br>todo en un lugar.</h1>
+    <p class="auth-hero__desc">Itinerario, gastos, documentos y reservas.<br>Planifica con IA y comparte con quien quieras.</p>
+    <div class="trip-cards-grid">
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Tokio</span>
+        <span class="trip-card-mock__dates">Mar — Abr 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Roma</span>
+        <span class="trip-card-mock__dates">Jun — Jul 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Bangkok</span>
+        <span class="trip-card-mock__dates">Ago — Sep 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Nueva York</span>
+        <span class="trip-card-mock__dates">Nov — Dic 2025</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel del formulario -->
+  <div class="auth-panel">
+    <div class="auth-form-inner">
+      <h2>Bienvenido de nuevo</h2>
+      <p class="auth-subtitle">Accede a tus viajes y planes guardados</p>
+
+      <div class="auth-tabs">
+        <a href="{% url 'login' %}" class="auth-tab auth-tab--active">Iniciar sesión</a>
+        <a href="{% url 'register' %}" class="auth-tab">Crear Cuenta</a>
+      </div>
+
+      {% if form.errors %}
+      <div class="auth-error-msg">Usuario o contraseña incorrectos.</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="auth-field-group">
+          <label for="id_username">Usuario</label>
+          <input type="text" name="username" id="id_username" class="auth-input"
+            placeholder="Tu nombre de usuario" autofocus required>
+        </div>
+        <div class="auth-field-group">
+          <label for="id_password">Contraseña</label>
+          <input type="password" name="password" id="id_password" class="auth-input"
+            placeholder="Tu contraseña" required>
+        </div>
+        <div class="auth-row-between">
+          <a href="#" class="auth-link-muted">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button type="submit" class="btn-auth-submit">Iniciar sesión</button>
+      </form>
+
+      <p class="auth-footer-note">
+        ¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base_auth.html' %}
+
+{% block title %}Crear cuenta - PokeTrip{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+  <!-- Hero izquierda -->
+  <div class="auth-hero">
+    <h1 class="auth-hero__title">Empieza a<br>planificar hoy.</h1>
+    <p class="auth-hero__desc">Crea tu cuenta gratuita y organiza tus viajes en un solo lugar. Itinerarios, gastos, reservas y mucho mas.</p>
+    <div class="trip-cards-grid">
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Tokio</span>
+        <span class="trip-card-mock__dates">Mar - Abr 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Roma</span>
+        <span class="trip-card-mock__dates">Jun - Jul 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Bangkok</span>
+        <span class="trip-card-mock__dates">Ago - Sep 2025</span>
+      </div>
+      <div class="trip-card-mock">
+        <span class="trip-card-mock__title">Nueva York</span>
+        <span class="trip-card-mock__dates">Nov - Dic 2025</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel del formulario -->
+  <div class="auth-panel">
+    <div class="auth-form-inner">
+      <h2>Crear una cuenta</h2>
+      <p class="auth-subtitle">Empieza a planificar tus proximos viajes</p>
+
+      <div class="auth-tabs">
+        <a href="{% url 'login' %}" class="auth-tab">Iniciar sesion</a>
+        <a href="{% url 'register' %}" class="auth-tab auth-tab--active">Crear Cuenta</a>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="auth-field-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <input
+            type="{{ field.field.widget.input_type }}"
+            name="{{ field.html_name }}"
+            id="{{ field.id_for_label }}"
+            value="{{ field.value|default:'' }}"
+            class="auth-input{% if field.errors %} auth-input--error{% endif %}"
+            placeholder="{{ field.label }}"
+            {% if forloop.first %}autofocus{% endif %}
+            {% if field.field.required %}required{% endif %}>
+          {% for error in field.errors %}
+          <p class="auth-field-error">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn-auth-submit" style="margin-top:8px;">Crear cuenta</button>
+      </form>
+
+      <p class="auth-footer-note">
+        Ya tienes cuenta? <a href="{% url 'login' %}">Iniciar sesion</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
