@@ -1,0 +1,254 @@
+/* ─────────────────────────────────────────
+   Auth pages — login & register shared CSS
+───────────────────────────────────────── */
+
+/* Override: auth-layout wraps the full split page */
+.auth-layout {
+  padding: 0;
+  display: block;
+  min-height: 100vh;
+}
+
+/* ── Full-height split container ── */
+.auth-page {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Left hero ── */
+.auth-hero {
+  flex: 1;
+  background: #f0f0f0;
+  padding: 72px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.auth-hero__title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0a0a0a;
+  margin: 0 0 20px;
+}
+
+.auth-hero__desc {
+  font-size: 0.95rem;
+  color: #525252;
+  line-height: 1.7;
+  margin: 0 0 48px;
+  max-width: 340px;
+}
+
+.trip-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.trip-card-mock {
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 14px;
+  padding: 18px 16px 16px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.trip-card-mock::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f5c542;
+}
+
+.trip-card-mock__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.trip-card-mock__dates {
+  font-size: 0.72rem;
+  color: #888;
+  margin-top: 3px;
+}
+
+/* ── Right form panel ── */
+.auth-panel {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 52px;
+  border-left: 1px solid #e8e8e8;
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 340px;
+}
+
+.auth-form-inner h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #0a0a0a;
+}
+
+.auth-form-inner .auth-subtitle {
+  font-size: 0.84rem;
+  color: #6b6b6b;
+  margin: 0 0 26px;
+}
+
+/* ── Tabs ── */
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.auth-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e5e5e5;
+  text-decoration: none;
+  color: #525252;
+  background: #fff;
+  transition: all 0.15s;
+}
+
+.auth-tab--active {
+  background: #0a0a0a;
+  color: #fff;
+  border-color: #0a0a0a;
+}
+
+.auth-tab:hover:not(.auth-tab--active) {
+  border-color: #b0b0b0;
+  color: #0a0a0a;
+}
+
+/* ── Fields ── */
+.auth-field-group {
+  margin-bottom: 14px;
+}
+
+.auth-field-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b6b6b;
+  margin-bottom: 7px;
+  font-weight: 500;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  color: #0a0a0a;
+  background: #fff;
+}
+
+.auth-input:focus {
+  border-color: #0a0a0a;
+}
+
+.auth-input--error {
+  border-color: #dc2626;
+}
+
+.auth-field-error {
+  color: #dc2626;
+  font-size: 0.78rem;
+  margin-top: 5px;
+}
+
+/* ── Helpers ── */
+.auth-row-between {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.auth-link-muted {
+  font-size: 0.78rem;
+  color: #6b6b6b;
+  text-decoration: none;
+}
+
+.auth-link-muted:hover { color: #0a0a0a; }
+
+/* ── Submit button ── */
+.btn-auth-submit {
+  width: 100%;
+  padding: 13px;
+  background: #0a0a0a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+
+.btn-auth-submit:hover { opacity: 0.82; }
+
+/* ── Footer note ── */
+.auth-footer-note {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: #6b6b6b;
+}
+
+.auth-footer-note a {
+  color: #0a0a0a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ── Error alert ── */
+.auth-error-msg {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 16px;
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 768px) {
+  .auth-hero { display: none; }
+  .auth-panel {
+    width: 100%;
+    min-width: unset;
+    padding: 0 28px;
+    border-left: none;
+  }
+  .auth-page { overflow: auto; }
+}
