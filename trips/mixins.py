@@ -34,7 +34,7 @@ class TripAccessMixin:
 
 
 class TripEditorMixin(TripAccessMixin):
-    """Solo owner y invitado pueden modificar."""
+    """Solo owner e invitado pueden modificar."""
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
