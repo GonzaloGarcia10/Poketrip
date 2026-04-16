@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — PokeTrip{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block bnav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <div class="dashboard-welcome">
+    <h1>Hola, {{ user.username }} 👋</h1>
+    <p>Aquí tienes un resumen de tus próximos viajes.</p>
+  </div>
+
+  <div class="dashboard-section">
+    <div class="dashboard-section__head">
+      <h2>Tus viajes</h2>
+    </div>
+
+    {% if trips %}
+    <div class="trips-grid">
+      {% for trip in trips %}
+      <a href="{% url 'trip_detail' trip.pk %}" class="trip-card">
+        <div class="trip-card__dot"></div>
+        <div class="trip-card__body">
+          <span class="trip-card__title">{{ trip.title }}</span>
+          <span class="trip-card__destination">{{ trip.destination }}</span>
+          <span class="trip-card__dates">
+            {{ trip.start_date|date:"d M Y" }} — {{ trip.end_date|date:"d M Y" }}
+          </span>
+        </div>
+        {% if trip.owner == request.user %}
+        <span class="trip-card__badge trip-card__badge--owner">Propietario</span>
+        {% else %}
+        <span class="trip-card__badge trip-card__badge--member">Miembro</span>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    <a href="{% url 'trip_list' %}" class="see-all-link">Ver todos los viajes →</a>
+    {% else %}
+    <div class="empty-state">
+      <p>Aún no tienes viajes planificados.</p>
+      <a href="{% url 'trip_create' %}" class="btn-primary">Crea tu primer viaje</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
