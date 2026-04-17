@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} — PokeTrip{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block nav_trips %}active{% endblock %}
+{% block bnav_trips %}active{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <h1 class="form-card__title">{{ action }}</h1>
+
+    <form method="post" class="trip-form">
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="form-field{% if field.errors %} form-field--error{% endif %}">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {% if field.field.widget.input_type == 'select' %}
+          {{ field }}
+        {% else %}
+          <input
+            type="{{ field.field.widget.input_type }}"
+            name="{{ field.html_name }}"
+            id="{{ field.id_for_label }}"
+            value="{{ field.value|default:'' }}"
+            class="form-input{% if field.errors %} form-input--error{% endif %}"
+            {% if field.field.required %}required{% endif %}>
+        {% endif %}
+        {% for error in field.errors %}
+        <p class="form-field-error">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">{{ action }}</button>
+        {% if trip %}
+        <a href="{% url 'trip_detail' trip.pk %}" class="btn-secondary">Cancelar</a>
+        {% else %}
+        <a href="{% url 'trip_list' %}" class="btn-secondary">Cancelar</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

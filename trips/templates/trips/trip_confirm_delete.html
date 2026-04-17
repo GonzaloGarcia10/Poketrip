@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar {{ trip.title }} — PokeTrip{% endblock %}
+{% block page_title %}Eliminar viaje{% endblock %}
+{% block nav_trips %}active{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <h1 class="form-card__title">¿Eliminar "{{ trip.title }}"?</h1>
+    <p style="color:#525252;margin-bottom:24px;">Esta acción no se puede deshacer. Se eliminarán todos los días, gastos y documentos asociados.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-actions">
+        <button type="submit" class="btn-danger">Sí, eliminar</button>
+        <a href="{% url 'trip_detail' trip.pk %}" class="btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
