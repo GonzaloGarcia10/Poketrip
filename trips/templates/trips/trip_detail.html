@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ trip.title }} — PokeTrip{% endblock %}
+{% block page_title %}{{ trip.title }}{% endblock %}
+{% block nav_trips %}active{% endblock %}
+{% block bnav_trips %}active{% endblock %}
+
+{% block role_badge %}
+<span class="role-badge role-badge--{{ role }}">{{ role }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="trip-detail">
+
+  <!-- Cabecera -->
+  <div class="trip-detail__header">
+    <div>
+      <h1 class="trip-detail__title">{{ trip.title }}</h1>
+      <p class="trip-detail__meta">
+        {{ trip.destination }} &nbsp;·&nbsp;
+        {{ trip.start_date|date:"d M Y" }} → {{ trip.end_date|date:"d M Y" }}
+        {% if trip.budget %}
+          &nbsp;·&nbsp; {{ trip.budget }} {{ trip.currency }}
+        {% endif %}
+      </p>
+    </div>
+    {% if role == 'owner' %}
+    <div class="trip-detail__actions">
+      <a href="{% url 'trip_edit' trip.pk %}" class="btn-secondary">Editar</a>
+      <a href="{% url 'trip_delete' trip.pk %}" class="btn-danger">Eliminar</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Secciones -->
+  <div class="trip-sections">
+
+    <div class="trip-section">
+      <div class="trip-section__head">
+        <h2>Itinerario</h2>
+        <a href="{% url 'itinerary' trip.pk %}" class="btn-primary btn-primary--sm">Ver días</a>
+      </div>
+      <p class="empty-hint">Planifica día a día tu viaje</p>
+    </div>
+
+    <div class="trip-section">
+      <div class="trip-section__head">
+        <h2>Gastos</h2>
+        <a href="{% url 'expense_list' trip.pk %}" class="btn-primary btn-primary--sm">Ver todos</a>
+      </div>
+      <p class="empty-hint">Gestiona los gastos del viaje</p>
+    </div>
+
+    <div class="trip-section">
+      <div class="trip-section__head">
+        <h2>Documentos</h2>
+        <a href="{% url 'document_list' trip.pk %}" class="btn-primary btn-primary--sm">Ver todos</a>
+      </div>
+      <p class="empty-hint">Gestiona los documentos del viaje</p>
+    </div>
+
+    <div class="trip-section">
+      <div class="trip-section__head">
+        <h2>Reservas</h2>
+        <a href="{% url 'reservation_list' trip.pk %}" class="btn-primary btn-primary--sm">Ver todas</a>
+      </div>
+      <p class="empty-hint">Vuelos, hoteles y más</p>
+    </div>
+
+    <div class="trip-section">
+      <div class="trip-section__head">
+        <h2>Miembros</h2>
+      </div>
+      <ul class="members-list">
+        {% for m in members %}
+        <li class="members-list__item">
+          <div class="avatar-placeholder avatar-placeholder--sm">{{ m.user.username|first|upper }}</div>
+          <span>{{ m.user.username }}</span>
+          <span class="role-badge role-badge--{{ m.role }}">{{ m.role }}</span>
+          {% if role == 'owner' and m.role != 'owner' %}
+          <form method="post" action="{% url 'trip_remove_member' trip.pk m.pk %}" style="margin-left:auto;">
+            {% csrf_token %}
+            <button type="submit" class="doc-action doc-action--danger" title="Eliminar miembro"
+              onclick="return confirm('\u00bfEliminar a {{ m.user.username }} del viaje?')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </form>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% if role == 'owner' %}
+      <form method="post" action="{% url 'trip_invite' trip.pk %}" style="margin-top:16px;display:flex;gap:10px;align-items:flex-end;">
+        {% csrf_token %}
+        <div class="form-field" style="flex:1;margin-bottom:0;">
+          <label class="form-label">Invitar por email</label>
+          <input type="email" name="email" class="form-input" placeholder="correo@ejemplo.com" required>
+          <input type="hidden" name="role" value="invitado">
+        </div>
+        <button type="submit" class="btn-primary" style="align-self:flex-end;">Invitar</button>
+      </form>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
