@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis viajes — PokeTrip{% endblock %}
+{% block page_title %}Mis viajes{% endblock %}
+{% block nav_trips %}active{% endblock %}
+{% block bnav_trips %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-heading">Mis viajes</h1>
+  <a href="{% url 'trip_create' %}" class="btn-primary">+ Nuevo viaje</a>
+</div>
+
+{% if trips %}
+<div class="trips-grid">
+  {% for trip in trips %}
+  <a href="{% url 'trip_detail' trip.pk %}" class="trip-card">
+    <div class="trip-card__dot"></div>
+    <div class="trip-card__body">
+      <span class="trip-card__title">{{ trip.title }}</span>
+      <span class="trip-card__destination">{{ trip.destination }}</span>
+      <span class="trip-card__dates">
+        {{ trip.start_date|date:"d M Y" }} — {{ trip.end_date|date:"d M Y" }}
+      </span>
+    </div>
+    {% if trip.owner == request.user %}
+    <span class="trip-card__badge trip-card__badge--owner">Propietario</span>
+    {% else %}
+    <span class="trip-card__badge trip-card__badge--member">Miembro</span>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p>Aún no tienes viajes.</p>
+  <a href="{% url 'trip_create' %}" class="btn-primary">Crea tu primer viaje</a>
+</div>
+{% endif %}
+{% endblock %}
