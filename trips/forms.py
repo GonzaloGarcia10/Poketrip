@@ -1,5 +1,5 @@
 from django import forms
-from .models import Trip, TripMembership, Document
+from .models import Trip, TripMembership, Document, Expense
 
 
 class TripForm(forms.ModelForm):
@@ -26,7 +26,7 @@ class TripForm(forms.ModelForm):
 class InviteForm(forms.Form):
     email = forms.EmailField(label='Correo electrónico')
     role = forms.ChoiceField(
-        choices=[('editor', 'Editor'), ('viewer', 'Visualizador')],
+        choices=[('invitado', 'Invitado')],
         label='Rol',
     )
 
@@ -35,3 +35,13 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = ['name', 'file']
+
+
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ['concept', 'amount', 'category', 'currency', 'date', 'notes']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 2}),
+        }
