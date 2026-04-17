@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import FileResponse, Http404
 import os
 
-from .models import Trip, TripMembership, Document
-from .forms import TripForm, DocumentForm
+from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay
+from .forms import TripForm, DocumentForm, ExpenseForm
 
 
 @login_required
@@ -93,7 +93,7 @@ def trip_delete(request, pk):
     return render(request, 'trips/trip_confirm_delete.html', {'trip': trip})
 
 
-# ── Documentos ──────────────────────────────────────────────────
+# Documentos
 
 @login_required
 def documents_global(request):
@@ -203,3 +203,166 @@ def document_delete(request, trip_pk, doc_pk):
         messages.success(request, 'Documento eliminado.')
     return redirect('documents_global')
 
+
+# Gastos
+
+@login_required
+def expenses_global(request):
+    """Página global de gastos: muestra todos los gastos del usuario agrupados por viaje."""
+    owned = Trip.objects.filter(owner=request.user)
+    shared = Trip.objects.filter(
+        memberships__user=request.user, memberships__status='accepted'
+    ).exclude(owner=request.user)
+    user_trips = (owned | shared).distinct().order_by('-start_date')
+
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        trip_pk = request.POST.get('trip_id')
+        trip = get_object_or_404(Trip, pk=trip_pk)
+        if _check_trip_access(request, trip) and form.is_valid():
+            expense = form.save(commit=False)
+            expense.trip = trip
+            expense.paid_by = request.user
+            expense.save()
+            messages.success(request, 'Gasto añadido.')
+        return redirect('expenses_global')
+
+    q = request.GET.get('q', '').strip()
+    expenses = Expense.objects.filter(trip__in=user_trips).select_related('trip', 'paid_by').order_by('-date')
+    if q:
+        expenses = expenses.filter(Q(concept__icontains=q) | Q(trip__title__icontains=q))
+
+    total = expenses.aggregate(total=Sum('amount'))['total'] or 0
+
+    return render(request, 'trips/expenses_global.html', {
+        'expenses': expenses,
+        'user_trips': user_trips,
+        'total': total,
+        'q': q,
+    })
+
+
+@login_required
+def expense_list(request, trip_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        messages.error(request, 'No tienes acceso a este viaje.')
+        return redirect('trip_list')
+
+    expenses = trip.expenses.select_related('paid_by').order_by('-date')
+    total = expenses.aggregate(total=Sum('amount'))['total'] or 0
+
+    form = ExpenseForm()
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            expense = form.save(commit=False)
+            expense.trip = trip
+            expense.paid_by = request.user
+            expense.save()
+            messages.success(request, 'Gasto añadido.')
+            return redirect('expense_list', trip_pk=trip.pk)
+
+    return render(request, 'trips/expense_list.html', {
+        'trip': trip,
+        'expenses': expenses,
+        'total': total,
+        'form': form,
+    })
+
+
+@login_required
+def expense_delete(request, trip_pk, expense_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    expense = get_object_or_404(Expense, pk=expense_pk, trip=trip)
+    if expense.paid_by != request.user and trip.owner != request.user:
+        messages.error(request, 'No puedes eliminar este gasto.')
+        return redirect('expense_list', trip_pk=trip.pk)
+    if request.method == 'POST':
+        expense.delete()
+        messages.success(request, 'Gasto eliminado.')
+    return redirect('expense_list', trip_pk=trip.pk)
+
+
+# ── Itinerario ──────────────────────────────────────────────────
+
+@login_required
+def itinerary_global(request):
+    """Página global de itinerario: lista todos los viajes con sus días e ítems."""
+    owned = Trip.objects.filter(owner=request.user)
+    shared = Trip.objects.filter(
+        memberships__user=request.user, memberships__status='accepted'
+    ).exclude(owner=request.user)
+    user_trips = (owned | shared).distinct().prefetch_related(
+        'days__items'
+    ).order_by('-start_date')
+
+    return render(request, 'trips/itinerary_global.html', {
+        'user_trips': user_trips,
+    })
+
+
+@login_required
+def itinerary(request, trip_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        messages.error(request, 'No tienes acceso a este viaje.')
+        return redirect('trip_list')
+
+    days = trip.days.prefetch_related('items').order_by('day_index')
+
+    # Crear días automáticamente si no existen
+    if not days.exists() and trip.start_date and trip.end_date:
+        from datetime import timedelta
+        current = trip.start_date
+        idx = 1
+        while current <= trip.end_date:
+            TripDay.objects.get_or_create(trip=trip, date=current, defaults={'day_index': idx})
+            current += timedelta(days=1)
+            idx += 1
+        days = trip.days.prefetch_related('items').order_by('day_index')
+
+    return render(request, 'trips/itinerary.html', {
+        'trip': trip,
+        'days': days,
+    })
+
+
+@login_required
+def itinerary_item_create(request, trip_pk, day_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    day = get_object_or_404(TripDay, pk=day_pk, trip=trip)
+    if not _check_trip_access(request, trip):
+        return redirect('trip_list')
+
+    if request.method == 'POST':
+        item_type = request.POST.get('item_type', 'activity')
+        title = request.POST.get('title', '').strip()
+        start_time = request.POST.get('start_time') or None
+        end_time = request.POST.get('end_time') or None
+        location = request.POST.get('location_text', '').strip()
+        description = request.POST.get('description', '').strip()
+        if title:
+            ItineraryItem.objects.create(
+                day=day,
+                item_type=item_type,
+                title=title,
+                start_time=start_time,
+                end_time=end_time,
+                location_text=location,
+                description=description,
+            )
+            messages.success(request, 'Actividad añadida.')
+    return redirect('itinerary', trip_pk=trip.pk)
+
+
+@login_required
+def itinerary_item_delete(request, trip_pk, item_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    item = get_object_or_404(ItineraryItem, pk=item_pk, day__trip=trip)
+    if trip.owner != request.user and not _check_trip_access(request, trip):
+        return redirect('trip_list')
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, 'Actividad eliminada.')
+    return redirect('itinerary', trip_pk=trip.pk)
