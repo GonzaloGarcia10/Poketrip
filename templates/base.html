@@ -29,27 +29,37 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item {% block nav_documents %}{% endblock %}">
+            <a href="{% url 'documents_global' %}" class="nav-item {% block nav_documents %}{% endblock %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 <span>Documentos</span>
             </a>
-            <a href="#" class="nav-item {% block nav_expenses %}{% endblock %}">
+            <a href="{% url 'expenses_global' %}" class="nav-item {% block nav_expenses %}{% endblock %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 <span>Gastos</span>
             </a>
-            <a href="#" class="nav-item {% block nav_trips %}{% endblock %}">
+            <a href="{% url 'trip_list' %}" class="nav-item {% block nav_trips %}{% endblock %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                 <span>Viajes</span>
             </a>
-            <a href="#" class="nav-item {% block nav_itinerary %}{% endblock %}">
+            <a href="{% url 'itinerary_global' %}" class="nav-item {% block nav_itinerary %}{% endblock %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <span>Itinerario</span>
             </a>
-            <a href="#" class="nav-item {% block nav_profile %}{% endblock %}">
+            <a href="{% url 'profile' %}" class="nav-item {% block nav_profile %}{% endblock %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span>Mi perfil</span>
             </a>
         </nav>
+
+        <div class="sidebar-footer">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-item nav-item--logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Cerrar sesión</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
     <main class="main-content">
@@ -81,143 +91,262 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Dashboard</span>
     </a>
-    <a href="#" class="bottom-nav-item {% block bnav_documents %}{% endblock %}">
+    <a href="{% url 'documents_global' %}" class="bottom-nav-item {% block bnav_documents %}{% endblock %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span>Documentos</span>
     </a>
-    <a href="#" class="bottom-nav-item {% block bnav_expenses %}{% endblock %}">
+    <a href="{% url 'expenses_global' %}" class="bottom-nav-item {% block bnav_expenses %}{% endblock %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         <span>Gastos</span>
     </a>
-    <a href="#" class="bottom-nav-item {% block bnav_trips %}{% endblock %}">
+    <a href="{% url 'trip_list' %}" class="bottom-nav-item {% block bnav_trips %}{% endblock %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
         <span>Viajes</span>
     </a>
-    <a href="#" class="bottom-nav-item {% block bnav_itinerary %}{% endblock %}">
+    <a href="{% url 'itinerary_global' %}" class="bottom-nav-item {% block bnav_itinerary %}{% endblock %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Itinerario</span>
     </a>
-    <a href="#" class="bottom-nav-item {% block bnav_profile %}{% endblock %}">
+    <a href="{% url 'profile' %}" class="bottom-nav-item {% block bnav_profile %}{% endblock %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Mi perfil</span>
     </a>
 </nav>
 
-<button class="btn-ia" title="Generar con IA">IA</button>
+<button class="btn-ia" id="btn-ia" title="Generar itinerario con IA" onclick="openIAModal()">
+  <svg width="56" height="56" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg1" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0F766E"/>
+        <stop offset="1" stop-color="#115E59"/>
+      </linearGradient>
+    </defs>
+    <circle cx="256" cy="256" r="224" fill="url(#bg1)"/>
+    <circle cx="256" cy="256" r="150" stroke="white" stroke-width="20" opacity="0.9"/>
+    <path d="M106 256H406" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+    <path d="M256 106C214 146 214 220 256 256C298 292 298 366 256 406" stroke="white" stroke-width="18" stroke-linecap="round"/>
+    <path d="M256 150C281 150 302 171 302 196C302 232 256 278 256 278C256 278 210 232 210 196C210 171 231 150 256 150Z" fill="white"/>
+    <circle cx="256" cy="196" r="14" fill="#0F766E"/>
+    <circle cx="348" cy="176" r="34" fill="#F59E0B"/>
+    <path d="M348 154V198" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <path d="M326 176H370" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  </svg>
+</button>
 
-{% block extra_js %}{% endblock %}
-</body>
-</html>
-
-
-    <aside class="sidebar">
-        <a href="{% url 'dashboard' %}" class="sidebar-logo">PokeTrip</a>
-
-        <div class="sidebar-user">
-            {% if user.profile.avatar %}
-                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="avatar-img">
-            {% else %}
-                <div class="avatar-placeholder">{{ user.username|first|upper }}</div>
-            {% endif %}
-            <span class="user-name">{{ user.username }}</span>
+<!-- Chatbot IA -->
+<div class="preview-modal" id="ia-modal" style="display:none;">
+  <div class="preview-modal__backdrop" onclick="closeIAModal()"></div>
+  <div class="preview-modal__box ia-chat__box">
+    <div class="ia-chat__header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="36" height="36" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <defs>
+            <linearGradient id="bg1h" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0F766E"/>
+              <stop offset="1" stop-color="#115E59"/>
+            </linearGradient>
+          </defs>
+          <circle cx="256" cy="256" r="224" fill="url(#bg1h)"/>
+          <circle cx="256" cy="256" r="150" stroke="white" stroke-width="20" opacity="0.9"/>
+          <path d="M106 256H406" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+          <path d="M256 106C214 146 214 220 256 256C298 292 298 366 256 406" stroke="white" stroke-width="18" stroke-linecap="round"/>
+          <path d="M256 150C281 150 302 171 302 196C302 232 256 278 256 278C256 278 210 232 210 196C210 171 231 150 256 150Z" fill="white"/>
+          <circle cx="256" cy="196" r="14" fill="#0F766E"/>
+          <circle cx="348" cy="176" r="34" fill="#F59E0B"/>
+          <path d="M348 154V198" stroke="white" stroke-width="10" stroke-linecap="round"/>
+          <path d="M326 176H370" stroke="white" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;">Asistente IA</div>
+          <div style="font-size:0.72rem;color:#aaa;">Planifica tu viaje con inteligencia artificial</div>
         </div>
-
-        <nav class="sidebar-nav">
-            <a href="{% url 'dashboard' %}" class="nav-item {% block nav_dashboard %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                <span>Dashboard</span>
-            </a>
-            <a href="#" class="nav-item {% block nav_documents %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>Documentos</span>
-            </a>
-            <a href="#" class="nav-item {% block nav_expenses %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                <span>Gastos</span>
-            </a>
-            <a href="#" class="nav-item {% block nav_trips %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                <span>Viajes</span>
-            </a>
-            <a href="#" class="nav-item {% block nav_itinerary %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span>Itinerario</span>
-            </a>
-            <a href="#" class="nav-item {% block nav_profile %}{% endblock %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Mi perfil</span>
-            </a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-bar">
-            <button class="back-btn" onclick="history.back()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <span class="page-title-mobile">{% block page_title %}PokeTrip{% endblock %}</span>
-            {% block role_badge %}{% endblock %}
-        </header>
-
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="message message--{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="page-content">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
-
-</div>
-
-<nav class="bottom-nav">
-    <a href="{% url 'dashboard' %}" class="bottom-nav-item {% block bnav_dashboard %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        <span>Dashboard</span>
-    </a>
-    <a href="#" class="bottom-nav-item {% block bnav_documents %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Documentos</span>
-    </a>
-    <a href="#" class="bottom-nav-item {% block bnav_expenses %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        <span>Gastos</span>
-    </a>
-    <a href="#" class="bottom-nav-item {% block bnav_trips %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        <span>Viajes</span>
-    </a>
-    <a href="#" class="bottom-nav-item {% block bnav_itinerary %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Itinerario</span>
-    </a>
-    <a href="#" class="bottom-nav-item {% block bnav_profile %}{% endblock %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Mi perfil</span>
-    </a>
-</nav>
-
-<button class="btn-ia" title="Generar con IA">IA</button>
-
-{% else %}
-
-<div class="auth-layout">
-    {% if messages %}
-    <div class="messages messages--auth">
-        {% for message in messages %}
-        <div class="message message--{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="ia-trip-select" class="form-input" style="font-size:0.78rem;padding:5px 8px;max-width:160px;">
+          <option value="">Cargando...</option>
+        </select>
+        <button class="preview-modal__close" title="Limpiar conversación" onclick="resetIAChat()" style="margin-right:2px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+        </button>
+        <button class="preview-modal__close" onclick="closeIAModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
-    {% endif %}
-    {% block content %}{% endblock %}
+    <div class="ia-chat__messages" id="ia-messages">
+      <div class="ia-msg ia-msg--bot">
+        <div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Selecciona un viaje arriba y pregúntame lo que necesites: itinerarios, actividades, restaurantes, consejos… ¿En qué puedo ayudarte?</div>
+      </div>
+    </div>
+    <div class="ia-chat__input-row">
+      <input type="text" id="ia-input" class="ia-chat__input"
+        placeholder="Escribe tu pregunta…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendIA();event.preventDefault();}">
+      <button class="ia-chat__send" onclick="sendIA()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
-{% endif %}
-
+{% block modals %}{% endblock %}
 {% block extra_js %}{% endblock %}
+<script>
+// ── Chatbot IA ──
+let iaChatHistory = [];
+
+function openIAModal() {
+  const modal = document.getElementById('ia-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fetch('/trips/api/trips/')
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('ia-trip-select');
+      if (!data.trips.length) {
+        sel.innerHTML = '<option value="">Sin viajes creados</option>';
+      } else {
+        sel.innerHTML = '<option value="">Selecciona un viaje…</option>' +
+          data.trips.map(t => `<option value="${t.id}">${t.title} — ${t.destination}</option>`).join('');
+      }
+    });
+  setTimeout(() => document.getElementById('ia-input').focus(), 150);
+}
+
+function closeIAModal() {
+  document.getElementById('ia-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function resetIAChat() {
+  iaChatHistory = [];
+  const msgs = document.getElementById('ia-messages');
+  msgs.innerHTML = '<div class="ia-msg ia-msg--bot"><div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Selecciona un viaje arriba y pregúntame lo que necesites: itinerarios, actividades, restaurantes, consejos… ¿En qué puedo ayudarte?</div></div>';
+}
+
+function appendMsg(role, html, items) {
+  const msgs = document.getElementById('ia-messages');
+  const div = document.createElement('div');
+  div.className = `ia-msg ia-msg--${role}`;
+  div.innerHTML = `<div class="ia-msg__bubble">${html}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendIA() {
+  const input = document.getElementById('ia-input');
+  const message = input.value.trim();
+  const tripId = document.getElementById('ia-trip-select').value;
+  if (!message) return;
+  if (!tripId) { alert('Selecciona un viaje primero.'); return; }
+  appendMsg('user', escapeHtml(message));
+  input.value = '';
+  iaChatHistory.push({role: 'user', content: message});
+
+  // Crear burbuja del bot con puntitos de carga mientras espera respuesta
+  const msgs = document.getElementById('ia-messages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'ia-msg ia-msg--bot';
+  const bubble = document.createElement('div');
+  bubble.className = 'ia-msg__bubble';
+  bubble.innerHTML = '<div class="ia-typing"><span></span><span></span><span></span></div>';
+  msgDiv.appendChild(bubble);
+  msgs.appendChild(msgDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  fetch(`/trips/api/ia/${tripId}/chat/`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify({message, history: iaChatHistory.slice(-8)}),
+  })
+  .then(r => {
+    if (!r.ok) return r.json().then(d => { throw new Error(d.error || `Error ${r.status}`); });
+    return r.json();
+  })
+  .then(data => {
+    if (data.error) {
+      bubble.innerHTML = `⚠️ ${escapeHtml(data.error)}`;
+      return;
+    }
+    const text = data.reply || '';
+    iaChatHistory.push({role: 'assistant', content: text});
+
+    // Efecto typewriter: revelar carácter a carácter
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i >= text.length) {
+        clearInterval(interval);
+        bubble.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
+        // Mostrar tarjeta de actividades si las hay
+        if (data.items && data.items.length) {
+          const card = document.createElement('div');
+          card.className = 'ia-items-card';
+          card.innerHTML = `
+            <div class="ia-items-card__title">📅 ${data.items.length} actividades generadas</div>
+            <div class="ia-items-list">
+              ${data.items.map(i => `
+                <div class="ia-item">
+                  <span>${typeEmoji(i.item_type)}</span>
+                  <div>
+                    <div class="ia-item__title">Día ${i.day||1} — ${escapeHtml(i.title)}</div>
+                    ${i.start_time ? `<div class="ia-item__meta">${i.start_time}${i.location_text?' · '+escapeHtml(i.location_text):''}</div>` : ''}
+                  </div>
+                </div>`).join('')}
+            </div>
+            <button class="btn-primary" style="width:100%;margin-top:12px;font-size:0.82rem;">
+              Añadir al itinerario
+            </button>`;
+          const btn = card.querySelector('button');
+          btn.dataset.items = JSON.stringify(data.items);
+          btn.dataset.tripId = tripId;
+          btn.onclick = function() { addToItinerary(this); };
+          msgDiv.appendChild(card);
+        }
+        msgs.scrollTop = msgs.scrollHeight;
+        return;
+      }
+      bubble.innerHTML = escapeHtml(text.slice(0, ++i)).replace(/\n/g, '<br>') + '<span class="ia-cursor">|</span>';
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 12);
+  })
+  .catch(err => { bubble.innerHTML = `⚠️ ${escapeHtml(err.message || 'Error de conexión. Inténtalo de nuevo.')}`; });
+}
+
+function addToItinerary(btn) {
+  const items = JSON.parse(btn.dataset.items);
+  const tripId = btn.dataset.tripId;
+  btn.textContent = 'Añadiendo...';
+  btn.disabled = true;
+  fetch(`/trips/api/ia/${tripId}/add-items/`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify({items}),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.added) {
+      btn.textContent = `✅ ${data.added} actividades añadidas`;
+      btn.style.background = '#16a34a';
+      setTimeout(() => {
+        btn.outerHTML = `<a href="${data.itinerary_url}" class="btn-primary" style="width:100%;display:block;text-align:center;font-size:0.82rem;margin-top:4px;text-decoration:none;border-radius:8px;padding:10px;">Ver itinerario →</a>`;
+      }, 1200);
+    }
+  });
+}
+
+function typeEmoji(t) {
+  return {activity:'🎯',transport:'✈️',meal:'🍽️',accommodation:'🏨',other:'📌'}[t]||'📌';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getCookie(name) {
+  return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith(name+'='))?.split('=')[1]||'';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIAModal(); });
+</script>
 </body>
 </html>
