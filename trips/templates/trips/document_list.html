@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentos — {{ trip.title }}{% endblock %}
+{% block page_title %}Documentos{% endblock %}
+{% block nav_documents %}active{% endblock %}
+{% block bnav_documents %}active{% endblock %}
+
+{% block content %}
+<div class="docs-page">
+
+  <!-- Cabecera -->
+  <div class="docs-header">
+    <div>
+      <h1 class="docs-header__title">{{ trip.title }}</h1>
+      <p class="docs-header__sub">{{ trip.destination }} &nbsp;·&nbsp; {{ trip.start_date|date:"d/m/Y" }} → {{ trip.end_date|date:"d/m/Y" }}</p>
+    </div>
+    <form method="get" class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar documentos…" class="docs-search__input">
+    </form>
+  </div>
+
+  <!-- Lista de documentos -->
+  <div class="docs-section">
+    <h2 class="docs-section__title">Mis documentos</h2>
+
+    {% if documents %}
+    <div class="docs-list">
+      {% for doc in documents %}
+      <div class="doc-item">
+        <div class="doc-item__icon doc-item__icon--{{ doc.mime_type|slice:':3' }}">
+          {% if 'pdf' in doc.mime_type %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          {% elif 'image' in doc.mime_type %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          {% elif 'word' in doc.mime_type or 'document' in doc.mime_type %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          {% endif %}
+        </div>
+        <div class="doc-item__info">
+          <span class="doc-item__name">{{ doc.name }}</span>
+          <span class="doc-item__meta">{{ doc.uploaded_by.username }} &nbsp;·&nbsp; {{ doc.uploaded_at|date:"d/m/Y" }}</span>
+        </div>
+        <div class="doc-item__actions">
+          <a href="{{ doc.file.url }}" download class="doc-action" title="Descargar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
+          {% if doc.uploaded_by == request.user or trip.owner == request.user %}
+          <form method="post" action="{% url 'document_delete' trip.pk doc.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="doc-action doc-action--danger" title="Eliminar"
+              onclick="return confirm('¿Eliminar {{ doc.name }}?')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="docs-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <p>{% if q %}No se encontraron documentos para "{{ q }}"{% else %}Aún no hay documentos en este viaje{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Subir documento -->
+  <div class="docs-section">
+    <h2 class="docs-section__title">Subir nuevo documento</h2>
+    <form method="post" enctype="multipart/form-data" id="upload-form">
+      {% csrf_token %}
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p class="dropzone__text">Arrastra y suelta archivos aquí</p>
+        <p class="dropzone__hint">o haz clic para seleccionar</p>
+        <input type="file" name="file" id="file-input" class="dropzone__input" required>
+        <span class="dropzone__filename" id="filename-label"></span>
+      </div>
+      <div class="upload-row">
+        <div class="form-field" style="flex:1;">
+          <label class="form-label">Nombre del documento</label>
+          <input type="text" name="name" class="form-input" placeholder="Ej: Pasaporte, Itinerario…" required>
+        </div>
+        <button type="submit" class="btn-primary" style="align-self:flex-end;">Subir</button>
+      </div>
+      <p class="docs-hint">Soporta PDF, DOCX, JPG, PNG</p>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('file-input');
+  const filenameLabel = document.getElementById('filename-label');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) {
+      filenameLabel.textContent = file.name;
+      dropzone.classList.add('dropzone--ready');
+    }
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dropzone--over');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dropzone--over');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dropzone--over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      filenameLabel.textContent = file.name;
+      dropzone.classList.add('dropzone--ready');
+    }
+  });
+</script>
+{% endblock %}
