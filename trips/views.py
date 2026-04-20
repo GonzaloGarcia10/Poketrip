@@ -472,7 +472,7 @@ def trip_remove_member(request, trip_pk, membership_pk):
     return redirect('trip_detail', pk=trip.pk)
 
 
-# ── API endpoints para IA ─────────────────────────────────
+# API endpoints para IA
 
 @login_required
 def api_user_trips(request):
@@ -606,6 +606,56 @@ Para preguntas generales responde solo en texto sin JSON."""
 
     except Exception as e:
         return JsonResponse({'error': f'Error OpenAI: {str(e)}'}, status=500)
+
+@login_required
+def api_ia_chat_general(request):
+    """Chatbot IA general: sin viaje específico, conversación libre."""
+    from django.conf import settings as django_settings
+    import re as _re
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+    message = data.get('message', '').strip()
+    history = data.get('history', [])
+    if not message:
+        return JsonResponse({'error': 'Mensaje vacío'}, status=400)
+
+    api_key = getattr(django_settings, 'OPENAI_API_KEY', '')
+    if not api_key or api_key.startswith('sk-pon'):
+        return JsonResponse({'error': 'API key de OpenAI no configurada.'}, status=503)
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+
+        system_prompt = """Eres un asistente de viajes para PokeTrip, una app de planificación de viajes.
+Responde siempre en español, de forma amigable y útil.
+Puedes ayudar con destinos, consejos de viaje, actividades, gastronomía, presupuestos y cualquier pregunta relacionada con viajes."""
+
+        messages_list = [{"role": "system", "content": system_prompt}]
+        for h in history[-8:]:
+            if h.get('role') in ('user', 'assistant') and h.get('content'):
+                messages_list.append({"role": h['role'], "content": h['content']})
+        messages_list.append({"role": "user", "content": message})
+
+        response = client.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=messages_list,
+            max_tokens=1000,
+            temperature=0.7,
+        )
+        reply = response.choices[0].message.content
+        return JsonResponse({'reply': reply, 'items': []})
+
+    except Exception as e:
+        return JsonResponse({'error': f'Error OpenAI: {str(e)}'}, status=500)
+
 
 @login_required
 def api_ia_add_items(request, trip_pk):

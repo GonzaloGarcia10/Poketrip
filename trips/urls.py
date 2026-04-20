@@ -31,6 +31,7 @@ urlpatterns = [
     # API IA
     path('api/trips/', views.api_user_trips, name='api_user_trips'),
     path('api/ia/<int:trip_pk>/generate/', views.api_ia_generate, name='api_ia_generate'),
+    path('api/ia/chat/', views.api_ia_chat_general, name='api_ia_chat_general'),
     path('api/ia/<int:trip_pk>/chat/', views.api_ia_chat, name='api_ia_chat'),
     path('api/ia/<int:trip_pk>/add-items/', views.api_ia_add_items, name='api_ia_add_items'),
 ]

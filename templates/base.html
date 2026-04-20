@@ -163,7 +163,7 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <select id="ia-trip-select" class="form-input" style="font-size:0.78rem;padding:5px 8px;max-width:160px;">
-          <option value="">Cargando...</option>
+          <option value="">Chat general</option>
         </select>
         <button class="preview-modal__close" title="Limpiar conversación" onclick="resetIAChat()" style="margin-right:2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
@@ -175,7 +175,7 @@
     </div>
     <div class="ia-chat__messages" id="ia-messages">
       <div class="ia-msg ia-msg--bot">
-        <div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Selecciona un viaje arriba y pregúntame lo que necesites: itinerarios, actividades, restaurantes, consejos… ¿En qué puedo ayudarte?</div>
+        <div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Puedes preguntarme lo que quieras sobre destinos, actividades, consejos de viaje… o selecciona un viaje para planificar tu itinerario. ¿En qué puedo ayudarte?</div>
       </div>
     </div>
     <div class="ia-chat__input-row">
@@ -221,7 +221,7 @@ function closeIAModal() {
 function resetIAChat() {
   iaChatHistory = [];
   const msgs = document.getElementById('ia-messages');
-  msgs.innerHTML = '<div class="ia-msg ia-msg--bot"><div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Selecciona un viaje arriba y pregúntame lo que necesites: itinerarios, actividades, restaurantes, consejos… ¿En qué puedo ayudarte?</div></div>';
+  msgs.innerHTML = '<div class="ia-msg ia-msg--bot"><div class="ia-msg__bubble">¡Hola! 👋 Soy tu asistente de viajes. Puedes preguntarme lo que quieras sobre destinos, actividades, consejos de viaje… o selecciona un viaje para planificar tu itinerario. ¿En qué puedo ayudarte?</div></div>';
 }
 
 function appendMsg(role, html, items) {
@@ -238,7 +238,6 @@ function sendIA() {
   const message = input.value.trim();
   const tripId = document.getElementById('ia-trip-select').value;
   if (!message) return;
-  if (!tripId) { alert('Selecciona un viaje primero.'); return; }
   appendMsg('user', escapeHtml(message));
   input.value = '';
   iaChatHistory.push({role: 'user', content: message});
@@ -254,7 +253,8 @@ function sendIA() {
   msgs.appendChild(msgDiv);
   msgs.scrollTop = msgs.scrollHeight;
 
-  fetch(`/trips/api/ia/${tripId}/chat/`, {
+  const chatUrl = tripId ? `/trips/api/ia/${tripId}/chat/` : '/trips/api/ia/chat/';
+  fetch(chatUrl, {
     method: 'POST',
     headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
     body: JSON.stringify({message, history: iaChatHistory.slice(-8)}),
