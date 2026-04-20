@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
+from django.views.decorators.http import require_POST
 import os
+import json
 
-from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay
-from .forms import TripForm, DocumentForm, ExpenseForm
+from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay, Reservation
+from .forms import TripForm, DocumentForm, ExpenseForm, ReservationForm, InviteForm
 
 
 @login_required
@@ -366,3 +368,283 @@ def itinerary_item_delete(request, trip_pk, item_pk):
         item.delete()
         messages.success(request, 'Actividad eliminada.')
     return redirect('itinerary', trip_pk=trip.pk)
+
+
+# ── Reservas ──────────────────────────────────────────────
+
+@login_required
+def reservation_list(request, trip_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        messages.error(request, 'No tienes acceso a este viaje.')
+        return redirect('trip_list')
+
+    reservations = trip.reservations.order_by('start_date')
+    form = ReservationForm()
+
+    if request.method == 'POST':
+        form = ReservationForm(request.POST)
+        if form.is_valid():
+            reservation = form.save(commit=False)
+            reservation.trip = trip
+            reservation.save()
+            messages.success(request, 'Reserva añadida.')
+            return redirect('reservation_list', trip_pk=trip.pk)
+
+    return render(request, 'trips/reservation_list.html', {
+        'trip': trip,
+        'reservations': reservations,
+        'form': form,
+    })
+
+
+@login_required
+def reservation_delete(request, trip_pk, reservation_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    reservation = get_object_or_404(Reservation, pk=reservation_pk, trip=trip)
+    if trip.owner != request.user and not _check_trip_access(request, trip):
+        messages.error(request, 'No tienes permiso.')
+        return redirect('reservation_list', trip_pk=trip.pk)
+    if request.method == 'POST':
+        reservation.delete()
+        messages.success(request, 'Reserva eliminada.')
+    return redirect('reservation_list', trip_pk=trip.pk)
+
+
+# ── Invitaciones de miembros ─────────────────────────────────
+
+@login_required
+def trip_invite(request, trip_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk, owner=request.user)
+    if request.method == 'POST':
+        form = InviteForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            # Evitar invitar al owner o a alguien ya invitado
+            if email == request.user.email:
+                messages.error(request, 'No puedes invitarte a ti mismo.')
+            elif TripMembership.objects.filter(trip=trip, invited_email=email).exists():
+                messages.warning(request, f'{email} ya ha sido invitado.')
+            else:
+                from django.utils import timezone
+                from datetime import timedelta
+                membership = TripMembership.objects.create(
+                    trip=trip,
+                    invited_email=email,
+                    role='invitado',
+                    status='pending',
+                    expiration=timezone.now() + timedelta(days=7),
+                )
+                messages.success(request, f'Invitación enviada a {email}.')
+    return redirect('trip_detail', pk=trip.pk)
+
+
+def trip_accept_invite(request, token):
+    """Acepta una invitación a un viaje a través del token."""
+    from django.utils import timezone
+    membership = get_object_or_404(TripMembership, token=token, status='pending')
+
+    if membership.expiration and membership.expiration < timezone.now():
+        messages.error(request, 'Esta invitación ha expirado.')
+        return redirect('login')
+
+    if not request.user.is_authenticated:
+        request.session['pending_invite_token'] = token
+        return redirect(f'/accounts/login/?next=/trips/invite/{token}/accept/')
+
+    membership.user = request.user
+    membership.status = 'accepted'
+    membership.save()
+    messages.success(request, f'¡Te has unido a {membership.trip.title}!')
+    return redirect('trip_detail', pk=membership.trip.pk)
+
+
+@login_required
+def trip_remove_member(request, trip_pk, membership_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk, owner=request.user)
+    membership = get_object_or_404(TripMembership, pk=membership_pk, trip=trip)
+    if membership.role == 'owner':
+        messages.error(request, 'No puedes eliminar al propietario.')
+        return redirect('trip_detail', pk=trip.pk)
+    if request.method == 'POST':
+        membership.delete()
+        messages.success(request, 'Miembro eliminado del viaje.')
+    return redirect('trip_detail', pk=trip.pk)
+
+
+# ── API endpoints para IA ─────────────────────────────────
+
+@login_required
+def api_user_trips(request):
+    """Devuelve los viajes del usuario en JSON para el modal IA."""
+    owned = Trip.objects.filter(owner=request.user)
+    shared = Trip.objects.filter(
+        memberships__user=request.user, memberships__status='accepted'
+    ).exclude(owner=request.user)
+    trips = (owned | shared).distinct().order_by('-start_date').values('id', 'title', 'destination')
+    return JsonResponse({'trips': list(trips)})
+
+
+@login_required
+def api_ia_generate(request, trip_pk):
+    """Genera sugerencias de itinerario basadas en el destino y estilo del viaje."""
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        return JsonResponse({'error': 'Sin acceso'}, status=403)
+
+    style = request.GET.get('style', 'cultural')
+
+    # Sugerencias predefinidas por estilo (sin depéndencia de API externa)
+    suggestions_map = {
+        'cultural': [
+            {'title': f'Visita al museo principal de {trip.destination}', 'item_type': 'activity', 'start_time': '10:00'},
+            {'title': f'Paseo por el casco histórico de {trip.destination}', 'item_type': 'activity', 'start_time': '15:00'},
+            {'title': 'Cena en restaurante local tradicional', 'item_type': 'meal', 'start_time': '20:00'},
+            {'title': 'Visita a mercado de artés local', 'item_type': 'activity', 'start_time': '12:00'},
+            {'title': 'Tour guiado por monumentos históricos', 'item_type': 'activity', 'start_time': '09:00'},
+        ],
+        'adventure': [
+            {'title': f'Excursión de senderismo en {trip.destination}', 'item_type': 'activity', 'start_time': '08:00'},
+            {'title': 'Actividad de deportes de aventura', 'item_type': 'activity', 'start_time': '11:00'},
+            {'title': 'Almuerzo en la naturaleza', 'item_type': 'meal', 'start_time': '13:30'},
+            {'title': 'Ruta en bicicleta por los alrededores', 'item_type': 'activity', 'start_time': '16:00'},
+            {'title': 'Cena y descanso en alojamiento rural', 'item_type': 'meal', 'start_time': '20:00'},
+        ],
+        'beach': [
+            {'title': 'Mañana en la playa', 'item_type': 'activity', 'start_time': '10:00'},
+            {'title': 'Alquiler de barco o kayak', 'item_type': 'activity', 'start_time': '12:00'},
+            {'title': 'Comida de marisco en chiringuito', 'item_type': 'meal', 'start_time': '14:00'},
+            {'title': 'Snorkel o buceo', 'item_type': 'activity', 'start_time': '16:30'},
+            {'title': 'Puesta de sol y cena en el paseo maritimo', 'item_type': 'meal', 'start_time': '20:30'},
+        ],
+        'gastronomy': [
+            {'title': 'Desayuno en café local destacado', 'item_type': 'meal', 'start_time': '09:00'},
+            {'title': 'Tour gastronómico por el mercado central', 'item_type': 'activity', 'start_time': '11:00'},
+            {'title': 'Cata de vinos o cervezas artesanales', 'item_type': 'activity', 'start_time': '13:00'},
+            {'title': 'Clase de cocina local', 'item_type': 'activity', 'start_time': '16:00'},
+            {'title': 'Cena en restaurante con estrella Michelin o destacado', 'item_type': 'meal', 'start_time': '21:00'},
+        ],
+        'city': [
+            {'title': f'Tour en autobús turístico por {trip.destination}', 'item_type': 'activity', 'start_time': '10:00'},
+            {'title': 'Visita a zona de compras y tiendas locales', 'item_type': 'activity', 'start_time': '13:00'},
+            {'title': 'Almuerzo en food court o mercado gourmet', 'item_type': 'meal', 'start_time': '14:30'},
+            {'title': 'Visita a barrio de moda o arte callejero', 'item_type': 'activity', 'start_time': '17:00'},
+            {'title': 'Cena y ambiente nocturno', 'item_type': 'meal', 'start_time': '21:00'},
+        ],
+    }
+
+    suggestions = suggestions_map.get(style, suggestions_map['cultural'])
+    return JsonResponse({'suggestions': suggestions, 'trip': {'id': trip.pk, 'title': trip.title}})
+
+
+@login_required
+def api_ia_chat(request, trip_pk):
+    """Chatbot IA: recibe un mensaje y devuelve respuesta de OpenAI."""
+    from django.conf import settings as django_settings
+    import re as _re
+
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        return JsonResponse({'error': 'Sin acceso'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+    message = data.get('message', '').strip()
+    history = data.get('history', [])
+    if not message:
+        return JsonResponse({'error': 'Mensaje vacío'}, status=400)
+
+    api_key = getattr(django_settings, 'OPENAI_API_KEY', '')
+    if not api_key or api_key.startswith('sk-pon'):
+        return JsonResponse({'error': 'API key de OpenAI no configurada. Añade tu clave en .env'}, status=503)
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+
+        total_days = (trip.end_date - trip.start_date).days + 1 if trip.start_date and trip.end_date else 7
+        system_prompt = f"""Eres un asistente de viajes para PokeTrip, una app de planificación de viajes.
+El usuario planifica un viaje a {trip.destination} del {trip.start_date} al {trip.end_date} ({total_days} días).
+Estilo: {trip.travel_style or 'no especificado'}. Responde siempre en español, de forma amigable y breve.
+
+Cuando el usuario pida un itinerario o actividades concretas, incluye AL FINAL de tu respuesta (sin texto después) este bloque JSON:
+```json
+[{{"day": 1, "title": "Nombre", "item_type": "activity", "start_time": "10:00", "location_text": "Lugar"}}]
+```
+Tipos válidos: activity, transport, meal, accommodation, other.
+Para preguntas generales responde solo en texto sin JSON."""
+
+        messages_list = [{"role": "system", "content": system_prompt}]
+        for h in history[-8:]:
+            if h.get('role') in ('user', 'assistant') and h.get('content'):
+                messages_list.append({"role": h['role'], "content": h['content']})
+        messages_list.append({"role": "user", "content": message})
+
+        response = client.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=messages_list,
+            max_tokens=1200,
+            temperature=0.7,
+        )
+        reply = response.choices[0].message.content
+
+        items = []
+        json_match = _re.search(r'```json\s*(\[.*?\])\s*```', reply, _re.DOTALL)
+        if json_match:
+            try:
+                items = json.loads(json_match.group(1))
+                reply = reply[:json_match.start()].strip()
+            except Exception:
+                pass
+
+        return JsonResponse({'reply': reply, 'items': items})
+
+    except Exception as e:
+        return JsonResponse({'error': f'Error OpenAI: {str(e)}'}, status=500)
+
+@login_required
+def api_ia_add_items(request, trip_pk):
+    """Añade items de itinerario generados por IA al viaje."""
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    if not _check_trip_access(request, trip):
+        return JsonResponse({'error': 'Sin acceso'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+    items = data.get('items', [])
+
+    # Crear días si no existen
+    from datetime import timedelta
+    if not trip.days.exists() and trip.start_date and trip.end_date:
+        current = trip.start_date
+        idx = 1
+        while current <= trip.end_date:
+            TripDay.objects.get_or_create(trip=trip, date=current, defaults={'day_index': idx})
+            current += timedelta(days=1)
+            idx += 1
+
+    added = 0
+    for item_data in items:
+        day_index = item_data.get('day', 1)
+        day = trip.days.filter(day_index=day_index).first() or trip.days.order_by('day_index').first()
+        if day:
+            ItineraryItem.objects.create(
+                day=day,
+                title=item_data.get('title', 'Actividad'),
+                item_type=item_data.get('item_type', 'activity'),
+                start_time=item_data.get('start_time') or None,
+                location_text=item_data.get('location_text', ''),
+            )
+            added += 1
+
+    return JsonResponse({'added': added, 'itinerary_url': f'/trips/{trip_pk}/itinerary/'})
