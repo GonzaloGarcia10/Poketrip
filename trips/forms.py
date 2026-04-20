@@ -1,5 +1,5 @@
 from django import forms
-from .models import Trip, TripMembership, Document, Expense
+from .models import Trip, TripMembership, Document, Expense, Reservation
 
 
 class TripForm(forms.ModelForm):
@@ -43,5 +43,16 @@ class ExpenseForm(forms.ModelForm):
         fields = ['concept', 'amount', 'category', 'currency', 'date', 'notes']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 2}),
+        }
+
+
+class ReservationForm(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ['reservation_type', 'provider', 'locator', 'start_date', 'end_date', 'notes']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 2}),
         }
