@@ -57,7 +57,7 @@
             placeholder="Tu contraseña" required>
         </div>
         <div class="auth-row-between">
-          <a href="#" class="auth-link-muted">¿Olvidaste tu contraseña?</a>
+          <a href="{% url 'password_reset' %}" class="auth-link-muted">¿Olvidaste tu contraseña?</a>
         </div>
         <button type="submit" class="btn-auth-submit">Iniciar sesión</button>
       </form>
