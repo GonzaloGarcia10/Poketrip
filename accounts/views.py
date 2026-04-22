@@ -25,7 +25,20 @@ def profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
-            form.save()
+            # Guardar campos del modelo User
+            user = request.user
+            user.username = form.cleaned_data['username']
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.email = form.cleaned_data['email']
+            user.save()
+            # Eliminar avatar si se marcó
+            profile = form.save(commit=False)
+            if form.cleaned_data.get('remove_avatar'):
+                if profile.avatar:
+                    profile.avatar.delete(save=False)
+                    profile.avatar = None
+            profile.save()
             messages.success(request, 'Perfil actualizado correctamente.')
             return redirect('profile')
     else:
