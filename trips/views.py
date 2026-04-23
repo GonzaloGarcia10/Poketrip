@@ -556,8 +556,12 @@ def api_ia_chat(request, trip_pk):
 
     message = data.get('message', '').strip()
     history = data.get('history', [])
-    if not message:
+    image_base64 = data.get('image_base64', '')
+    image_mime = data.get('image_mime', 'image/jpeg')
+    if not message and not image_base64:
         return JsonResponse({'error': 'Mensaje vacío'}, status=400)
+    if not message:
+        message = 'Describe lo que ves en esta imagen.'
 
     api_key = getattr(django_settings, 'OPENAI_API_KEY', '')
     if not api_key or api_key.startswith('sk-pon'):
@@ -583,7 +587,14 @@ Para preguntas generales responde solo en texto sin JSON."""
         for h in history[-8:]:
             if h.get('role') in ('user', 'assistant') and h.get('content'):
                 messages_list.append({"role": h['role'], "content": h['content']})
-        messages_list.append({"role": "user", "content": message})
+        if image_base64:
+            user_content = [
+                {"type": "text", "text": message},
+                {"type": "image_url", "image_url": {"url": f"data:{image_mime};base64,{image_base64}"}},
+            ]
+        else:
+            user_content = message
+        messages_list.append({"role": "user", "content": user_content})
 
         response = client.chat.completions.create(
             model='gpt-4o-mini',
@@ -623,8 +634,12 @@ def api_ia_chat_general(request):
 
     message = data.get('message', '').strip()
     history = data.get('history', [])
-    if not message:
+    image_base64 = data.get('image_base64', '')
+    image_mime = data.get('image_mime', 'image/jpeg')
+    if not message and not image_base64:
         return JsonResponse({'error': 'Mensaje vacío'}, status=400)
+    if not message:
+        message = 'Describe lo que ves en esta imagen.'
 
     api_key = getattr(django_settings, 'OPENAI_API_KEY', '')
     if not api_key or api_key.startswith('sk-pon'):
@@ -642,7 +657,14 @@ Puedes ayudar con destinos, consejos de viaje, actividades, gastronomía, presup
         for h in history[-8:]:
             if h.get('role') in ('user', 'assistant') and h.get('content'):
                 messages_list.append({"role": h['role'], "content": h['content']})
-        messages_list.append({"role": "user", "content": message})
+        if image_base64:
+            user_content = [
+                {"type": "text", "text": message},
+                {"type": "image_url", "image_url": {"url": f"data:{image_mime};base64,{image_base64}"}},
+            ]
+        else:
+            user_content = message
+        messages_list.append({"role": "user", "content": user_content})
 
         response = client.chat.completions.create(
             model='gpt-4o-mini',
