@@ -67,19 +67,6 @@ def trip_detail(request, pk):
     ).role
     members = TripMembership.objects.filter(trip=trip, status='accepted').select_related('user')
 
-    # Mostrar enlace de la última invitación creada en este viaje (una sola vez)
-    last_invite = None
-    pending = request.session.get('last_invite')
-    if pending and pending.get('trip_pk') == trip.pk:
-        last_invite = pending
-        del request.session['last_invite']
-
-    return render(request, 'trips/trip_detail.html', {
-        'trip': trip,
-        'role': role,
-        'members': members,
-        'last_invite': last_invite,
-    })
 
 
 @login_required
