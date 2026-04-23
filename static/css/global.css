@@ -677,6 +677,39 @@ img { display: block; max-width: 100%; }
 .empty-state p { margin-bottom: 16px; font-size: 0.9rem; }
 .empty-hint { color: var(--gray-300); font-size: 0.85rem; padding: 16px 0; }
 
+/* Tarjeta de enlace de invitación recién creada */
+.invite-link-card {
+    margin-top: 16px;
+    padding: 14px;
+    background: #f4fbf9;
+    border: 1px solid #cbe9e2;
+    border-radius: 12px;
+}
+.invite-link-card__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+.invite-link-card__head strong {
+    font-size: 0.9rem;
+    color: #0f766e;
+}
+.invite-link-card__hint {
+    font-size: 0.78rem;
+    color: var(--gray-600);
+}
+.invite-link-card__row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+.invite-link-card__row .form-input {
+    flex: 1;
+    font-size: 0.78rem;
+    background: var(--white);
+}
+
 /* ── Buttons ── */
 .btn-primary {
     display: inline-block;

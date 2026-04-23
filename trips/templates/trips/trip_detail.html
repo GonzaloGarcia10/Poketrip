@@ -91,6 +91,30 @@
       </ul>
 
       {% if role == 'owner' %}
+      {% if last_invite %}
+      <div class="invite-link-card">
+        <div class="invite-link-card__head">
+          <strong>Enlace de invitación para {{ last_invite.email }}</strong>
+          <span class="invite-link-card__hint">Cópialo y compártelo manualmente. Caduca en 7 días.</span>
+        </div>
+        <div class="invite-link-card__row">
+          <input type="text" id="invite-link-input" class="form-input" value="{{ last_invite.url }}" readonly onclick="this.select()">
+          <button type="button" class="btn-primary btn-primary--sm" onclick="copyInviteLink()">Copiar</button>
+        </div>
+      </div>
+      <script>
+        function copyInviteLink() {
+          const i = document.getElementById('invite-link-input');
+          i.select();
+          navigator.clipboard.writeText(i.value).then(() => {
+            const btn = event.target;
+            const old = btn.textContent;
+            btn.textContent = '¡Copiado!';
+            setTimeout(() => { btn.textContent = old; }, 1500);
+          });
+        }
+      </script>
+      {% endif %}
       <form method="post" action="{% url 'trip_invite' trip.pk %}" style="margin-top:16px;display:flex;gap:10px;align-items:flex-end;">
         {% csrf_token %}
         <div class="form-field" style="flex:1;margin-bottom:0;">
