@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum
-from django.http import FileResponse, Http404, JsonResponse
-from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 import os
 import json
 
@@ -67,10 +66,19 @@ def trip_detail(request, pk):
         trip=trip, user=request.user, status='accepted'
     ).role
     members = TripMembership.objects.filter(trip=trip, status='accepted').select_related('user')
+
+    # Mostrar enlace de la última invitación creada en este viaje (una sola vez)
+    last_invite = None
+    pending = request.session.get('last_invite')
+    if pending and pending.get('trip_pk') == trip.pk:
+        last_invite = pending
+        del request.session['last_invite']
+
     return render(request, 'trips/trip_detail.html', {
         'trip': trip,
         'role': role,
         'members': members,
+        'last_invite': last_invite,
     })
 
 
@@ -108,7 +116,6 @@ def documents_global(request):
     user_trips = (owned | shared).distinct().order_by('-start_date')
 
     q = request.GET.get('q', '').strip()
-    from .models import Document
     documents = Document.objects.filter(trip__in=user_trips).select_related('trip', 'uploaded_by')
     if q:
         documents = documents.filter(name__icontains=q)
@@ -428,6 +435,7 @@ def trip_invite(request, trip_pk):
             else:
                 from django.utils import timezone
                 from datetime import timedelta
+                from django.urls import reverse
                 membership = TripMembership.objects.create(
                     trip=trip,
                     invited_email=email,
@@ -435,7 +443,15 @@ def trip_invite(request, trip_pk):
                     status='pending',
                     expiration=timezone.now() + timedelta(days=7),
                 )
-                messages.success(request, f'Invitación enviada a {email}.')
+                accept_url = request.build_absolute_uri(
+                    reverse('trip_accept_invite', args=[membership.token])
+                )
+                request.session['last_invite'] = {
+                    'email': email,
+                    'url': accept_url,
+                    'trip_pk': trip.pk,
+                }
+                messages.success(request, f'Invitación creada para {email}. Comparte el enlace de abajo.')
     return redirect('trip_detail', pk=trip.pk)
 
 
