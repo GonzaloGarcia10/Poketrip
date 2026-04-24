@@ -1486,3 +1486,67 @@ img { display: block; max-width: 100%; }
     width: 32px;
     height: 32px;
 }
+
+/* ── Mobile responsive — round 2 (fixes adicionales) ── */
+
+/* invite-link-card: evitar overflow del input largo */
+.invite-link-card__row .form-input { min-width: 0; }
+
+/* preview-modal: truncar título largo */
+.preview-modal__header { min-width: 0; }
+#preview-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* members-list: permitir wrap si el username es largo */
+.members-list__item {
+    flex-wrap: wrap;
+}
+.members-list__item > span,
+.members-list__item .members-list__name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* profile: permitir que valores largos hagan wrap */
+.profile-header { flex-wrap: wrap; }
+.profile-email { overflow-wrap: anywhere; min-width: 0; }
+.profile-info-row { flex-wrap: wrap; }
+.profile-info-row .profile-info-value,
+.profile-info-row > *:last-child { overflow-wrap: anywhere; min-width: 0; }
+
+@media (max-width: 600px) {
+    /* upload-row: apilar input y botón en móvil */
+    .upload-row {
+        flex-wrap: wrap;
+    }
+    .upload-row .form-input { width: 100%; min-width: 0; }
+    .upload-row .btn-primary { width: 100%; }
+
+    /* itinerary_global: header de cada viaje apilado */
+    .docs-section > div[style*="justify-content:space-between"] {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* invite-by-email form (inline en trip_detail): apilable */
+.invite-form {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.invite-form .form-field {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+@media (max-width: 480px) {
+    .invite-form .form-field { width: 100%; flex-basis: 100%; }
+    .invite-form .btn-primary { width: 100%; }
+}

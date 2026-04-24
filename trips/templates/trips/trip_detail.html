@@ -115,14 +115,14 @@
         }
       </script>
       {% endif %}
-      <form method="post" action="{% url 'trip_invite' trip.pk %}" style="margin-top:16px;display:flex;gap:10px;align-items:flex-end;">
+      <form method="post" action="{% url 'trip_invite' trip.pk %}" class="invite-form">
         {% csrf_token %}
-        <div class="form-field" style="flex:1;margin-bottom:0;">
+        <div class="form-field">
           <label class="form-label">Invitar por email</label>
           <input type="email" name="email" class="form-input" placeholder="correo@ejemplo.com" required>
           <input type="hidden" name="role" value="invitado">
         </div>
-        <button type="submit" class="btn-primary" style="align-self:flex-end;">Invitar</button>
+        <button type="submit" class="btn-primary">Invitar</button>
       </form>
       {% endif %}
     </div>
