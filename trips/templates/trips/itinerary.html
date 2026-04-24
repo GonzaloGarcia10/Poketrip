@@ -63,7 +63,7 @@
           <summary class="iday__add-btn">+ Añadir actividad</summary>
           <form method="post" action="{% url 'itinerary_item_create' trip.pk day.pk %}" class="iday__form">
             {% csrf_token %}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-grid-2col">
               <div class="form-field" style="grid-column:1/-1;">
                 <label class="form-label">Título</label>
                 <input type="text" name="title" class="form-input" placeholder="Ej: Visita al Templo de Senso-ji" required>
