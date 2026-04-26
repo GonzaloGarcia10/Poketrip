@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -32,6 +33,27 @@ def trip_list(request):
     return render(request, 'trips/trip_list.html', {'trips': trips})
 
 
+def _sync_trip_days(trip):
+    if not trip.start_date or not trip.end_date:
+        return trip.days.none()
+
+    current = trip.start_date
+    idx = 1
+    while current <= trip.end_date:
+        day, created = TripDay.objects.get_or_create(
+            trip=trip,
+            date=current,
+            defaults={'day_index': idx},
+        )
+        if not created and day.day_index != idx:
+            day.day_index = idx
+            day.save(update_fields=['day_index'])
+        current += timedelta(days=1)
+        idx += 1
+
+    return trip.days.prefetch_related('items').order_by('day_index')
+
+
 @login_required
 def trip_create(request):
     form = TripForm(request.POST or None)
@@ -39,6 +61,7 @@ def trip_create(request):
         trip = form.save(commit=False)
         trip.owner = request.user
         trip.save()
+        _sync_trip_days(trip)
         TripMembership.objects.create(
             trip=trip,
             user=request.user,
@@ -86,7 +109,8 @@ def trip_edit(request, pk):
     trip = get_object_or_404(Trip, pk=pk, owner=request.user)
     form = TripForm(request.POST or None, instance=trip)
     if request.method == 'POST' and form.is_valid():
-        form.save()
+        trip = form.save()
+        _sync_trip_days(trip)
         messages.success(request, 'Viaje actualizado.')
         return redirect('trip_detail', pk=trip.pk)
     return render(request, 'trips/trip_form.html', {'form': form, 'action': 'Editar viaje', 'trip': trip})
@@ -317,18 +341,7 @@ def itinerary(request, trip_pk):
         messages.error(request, 'No tienes acceso a este viaje.')
         return redirect('trip_list')
 
-    days = trip.days.prefetch_related('items').order_by('day_index')
-
-    # Crear días automáticamente si no existen
-    if not days.exists() and trip.start_date and trip.end_date:
-        from datetime import timedelta
-        current = trip.start_date
-        idx = 1
-        while current <= trip.end_date:
-            TripDay.objects.get_or_create(trip=trip, date=current, defaults={'day_index': idx})
-            current += timedelta(days=1)
-            idx += 1
-        days = trip.days.prefetch_related('items').order_by('day_index')
+    days = _sync_trip_days(trip)
 
     return render(request, 'trips/itinerary.html', {
         'trip': trip,
@@ -710,15 +723,7 @@ def api_ia_add_items(request, trip_pk):
 
     items = data.get('items', [])
 
-    # Crear días si no existen
-    from datetime import timedelta
-    if not trip.days.exists() and trip.start_date and trip.end_date:
-        current = trip.start_date
-        idx = 1
-        while current <= trip.end_date:
-            TripDay.objects.get_or_create(trip=trip, date=current, defaults={'day_index': idx})
-            current += timedelta(days=1)
-            idx += 1
+    _sync_trip_days(trip)
 
     added = 0
     for item_data in items:
