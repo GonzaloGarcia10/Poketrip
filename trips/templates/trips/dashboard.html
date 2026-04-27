@@ -8,11 +8,6 @@
 {% block content %}
 <div class="dashboard">
 
-  <div class="dashboard-welcome">
-    <h1>Hola, {{ user.username }} 👋</h1>
-    <p>Aquí tienes un resumen de tus próximos viajes.</p>
-  </div>
-
   <div class="dashboard-section">
     <div class="dashboard-section__head">
       <h2>Tus viajes</h2>
@@ -21,8 +16,11 @@
     {% if trips %}
     <div class="trips-grid">
       {% for trip in trips %}
-      <a href="{% url 'trip_detail' trip.pk %}" class="trip-card">
-        <div class="trip-card__dot"></div>
+      <a href="{% url 'trip_detail' trip.pk %}" class="trip-card" data-destination="{{ trip.destination|escape }}">
+        <span class="trip-card__live" data-live-chip>
+          <span class="trip-card__live-dot"></span>
+          <span class="trip-card__live-text">Cargando…</span>
+        </span>
         <div class="trip-card__body">
           <span class="trip-card__title">{{ trip.title }}</span>
           <span class="trip-card__destination">{{ trip.destination }}</span>
@@ -48,4 +46,81 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ============================================================
+   Dashboard · Live weather chip per trip card
+   API: Open-Meteo (geocoding + forecast). No key required.
+   - One geocoding request per unique destination (cached).
+   - Weather temperature shown as a chip in the card.
+   ============================================================ */
+(function () {
+  const cards = document.querySelectorAll('.trip-card[data-destination]');
+  if (!cards.length) return;
+
+  const geoCache = new Map();
+
+  async function geocode(name) {
+    if (geoCache.has(name)) return geoCache.get(name);
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=es&format=json`;
+    const promise = fetch(url)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (d && d.results && d.results[0]) || null)
+      .catch(() => null);
+    geoCache.set(name, promise);
+    return promise;
+  }
+
+  async function fetchWeather(lat, lon) {
+    try {
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`);
+      if (!r.ok) return null;
+      const data = await r.json();
+      return data.current || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function weatherIcon(code) {
+    if (code === 0) return '☀️';
+    if ([1, 2, 3].includes(code)) return '⛅';
+    if ([45, 48].includes(code)) return '🌫️';
+    if (code >= 51 && code <= 67) return '🌧️';
+    if (code >= 71 && code <= 77) return '❄️';
+    if (code >= 80 && code <= 82) return '🌦️';
+    if (code >= 95) return '⛈️';
+    return '🌡️';
+  }
+
+  function setChip(card, html, ok) {
+    const chip = card.querySelector('[data-live-chip]');
+    if (!chip) return;
+    chip.innerHTML = html;
+    chip.classList.toggle('trip-card__live--ok', !!ok);
+  }
+
+  cards.forEach(async (card) => {
+    const dest = (card.dataset.destination || '').trim();
+    if (!dest) {
+      setChip(card, '<span class="trip-card__live-text">Sin destino</span>', false);
+      return;
+    }
+    const loc = await geocode(dest);
+    if (!loc) {
+      setChip(card, '<span class="trip-card__live-text">Sin datos</span>', false);
+      return;
+    }
+    const weather = await fetchWeather(loc.latitude, loc.longitude);
+    if (!weather) {
+      setChip(card, `<span class="trip-card__live-text">${loc.country || ''}</span>`, false);
+      return;
+    }
+    const icon = weatherIcon(weather.weather_code);
+    setChip(card, `<span class="trip-card__live-icon">${icon}</span><span class="trip-card__live-text">${Math.round(weather.temperature_2m)}°C</span>`, true);
+  });
+})();
+</script>
 {% endblock %}
