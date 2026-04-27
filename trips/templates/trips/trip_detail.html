@@ -127,6 +127,184 @@
       {% endif %}
     </div>
 
+    <div class="trip-section trip-section--wide trip-section--live"
+         data-destination="{{ trip.destination|escape }}"
+         data-currency="{{ trip.currency|default:'EUR'|escape }}">
+      <div class="trip-section__head trip-section__head--stacked">
+        <div>
+          <h2>Destino en tiempo real</h2>
+          <p class="trip-live__intro">Clima actual, moneda, idiomas, contexto del país y tipo de cambio actualizados desde APIs públicas.</p>
+        </div>
+        <span class="trip-live__badge">Ahora en directo</span>
+      </div>
+      <div id="trip-live-panel" class="trip-live-panel">
+        <p class="empty-hint">Cargando información del destino...</p>
+      </div>
+    </div>
+
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ICONS = {
+  capital: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>',
+  currency: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a3 3 0 0 0-5 2c0 3 5 1.5 5 4.5a3 3 0 0 1-5 2"/><path d="M12 6v2M12 16v2"/></svg>',
+  language: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h7"/><path d="M5 2v3"/><path d="M7 19s-1.5-3.5-2-5c-.5-1.5-.5-3 0-4"/><path d="M12 2l4 10 4-10"/><path d="M13.5 7h5"/></svg>',
+  clock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  people: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  fx: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l-3-3"/><path d="M21 17H8l3 3"/></svg>',
+};
+
+async function loadTripDestinationInsights() {
+  const section = document.querySelector('.trip-section--live');
+  const panel = document.getElementById('trip-live-panel');
+  if (!section || !panel) return;
+
+  const destination = (section.dataset.destination || '').trim();
+  if (!destination) {
+    panel.innerHTML = '<p class="empty-hint">Añade un destino al viaje para obtener información en vivo.</p>';
+    return;
+  }
+
+  try {
+    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(destination)}&count=1&language=es&format=json`);
+    if (!geoResponse.ok) throw new Error('No se ha podido localizar el destino.');
+    const geoData = await geoResponse.json();
+    const location = geoData.results && geoData.results[0];
+    if (!location) throw new Error('No se encontraron datos para este destino.');
+
+    let countryData = null;
+    // REST Countries: probamos primero por código alpha-2 (Open-Meteo lo expone como country_code)
+    // y como fallback por nombre. Esto evita "No disponible" cuando el geocoder devuelve el nombre en español.
+    if (location.country_code) {
+      try {
+        const r = await fetch(`https://restcountries.com/v3.1/alpha/${encodeURIComponent(location.country_code)}`);
+        if (r.ok) {
+          const data = await r.json();
+          countryData = Array.isArray(data) ? data[0] : data;
+        }
+      } catch (_) { /* ignore */ }
+    }
+    if (!countryData && location.country) {
+      try {
+        const r = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(location.country)}`);
+        if (r.ok) {
+          const data = await r.json();
+          countryData = Array.isArray(data) ? data[0] : null;
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    let weatherMarkup = '<p class="empty-hint">Clima actual no disponible.</p>';
+    const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,wind_speed_10m&timezone=auto`);
+    if (weatherResponse.ok) {
+      const weatherData = await weatherResponse.json();
+      const current = weatherData.current;
+      weatherMarkup = `
+        <div class="trip-live-weather">
+          <span class="trip-live-weather__label">Clima ahora · ${location.name}</span>
+          <div class="trip-live-weather__main">
+            <strong>${Math.round(current.temperature_2m)}°C</strong>
+          </div>
+          <div class="trip-live-weather__meta">
+            <span>Sensación ${Math.round(current.apparent_temperature)}°C</span>
+            <span>Viento ${Math.round(current.wind_speed_10m)} km/h</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const currencyEntries = countryData && countryData.currencies ? Object.entries(countryData.currencies) : [];
+    const currencies = currencyEntries.length
+      ? currencyEntries.map(([code, item]) => `${item.symbol ? item.symbol + ' ' : ''}${item.name} (${code})`).join(', ')
+      : 'No disponible';
+    const languages = countryData && countryData.languages
+      ? Object.values(countryData.languages).join(', ')
+      : 'No disponible';
+    const capital = countryData && countryData.capital ? countryData.capital[0] : (location.admin1 || 'No disponible');
+    const region = countryData && countryData.region
+      ? `${countryData.region}${countryData.subregion ? ' · ' + countryData.subregion : ''}`
+      : '';
+    const population = countryData && countryData.population
+      ? new Intl.NumberFormat('es-ES').format(countryData.population)
+      : null;
+    const flag = countryData && countryData.flags ? countryData.flags.svg : '';
+
+    // 3ª API: Frankfurter (https://www.frankfurter.app) — tipo de cambio sin clave
+    const tripCurrency = (section.dataset.currency || 'EUR').toUpperCase();
+    const targets = ['EUR', 'USD', 'GBP', 'JPY'].filter((c) => c !== tripCurrency);
+    let exchangeMarkup = '';
+    try {
+      const fxResponse = await fetch(`https://api.frankfurter.app/latest?from=${tripCurrency}&to=${targets.join(',')}`);
+      if (fxResponse.ok) {
+        const fxData = await fxResponse.json();
+        const rates = fxData.rates || {};
+        const rows = Object.entries(rates)
+          .map(([code, value]) => `<li><span>1 ${tripCurrency}</span><strong>${value.toFixed(2)} ${code}</strong></li>`)
+          .join('');
+        exchangeMarkup = `
+          <div class="trip-live-card trip-live-card--fx">
+            <span class="trip-live-card__eyebrow">Tipo de cambio · ${fxData.date}</span>
+            <ul class="trip-live-fx">${rows}</ul>
+          </div>
+        `;
+      }
+    } catch (_) { /* ignore exchange errors */ }
+
+    panel.innerHTML = `
+      <div class="trip-live-grid">
+        <div class="trip-live-card trip-live-card--hero">
+          <div class="trip-live-card__head">
+            ${flag ? `<img src="${flag}" alt="Bandera de ${location.country}" class="trip-live-card__flag">` : ''}
+            <div>
+              <span class="trip-live-card__eyebrow">Vista general</span>
+              <h3>${location.name}</h3>
+              <p>${location.country}${location.admin1 ? ` · ${location.admin1}` : ''}${region ? `<br><span class="trip-live-card__sub">${region}</span>` : ''}</p>
+            </div>
+          </div>
+          ${weatherMarkup}
+        </div>
+        <div class="trip-live-card trip-live-info">
+          <div>
+            <span class="trip-live-card__eyebrow">Capital</span>
+            <strong>${capital}</strong>
+          </div>
+        </div>
+        <div class="trip-live-card trip-live-info">
+          <div>
+            <span class="trip-live-card__eyebrow">Moneda oficial</span>
+            <strong>${currencies}</strong>
+          </div>
+        </div>
+        <div class="trip-live-card trip-live-info">
+          <div>
+            <span class="trip-live-card__eyebrow">Idiomas</span>
+            <strong>${languages}</strong>
+          </div>
+        </div>
+        <div class="trip-live-card trip-live-info">
+          <div>
+            <span class="trip-live-card__eyebrow">Zona horaria</span>
+            <strong>${location.timezone || 'No disponible'}</strong>
+          </div>
+        </div>
+        ${population ? `
+        <div class="trip-live-card trip-live-info">
+          <div>
+            <span class="trip-live-card__eyebrow">Población</span>
+            <strong>${population}</strong>
+          </div>
+        </div>` : ''}
+        ${exchangeMarkup}
+      </div>
+    `;
+  } catch (error) {
+    panel.innerHTML = `<p class="empty-hint">${error.message}</p>`;
+  }
+}
+
+loadTripDestinationInsights();
+</script>
 {% endblock %}
