@@ -12,6 +12,12 @@
 <body>
 
 <div class="auth-layout">
+    <a href="{% url 'home' %}" class="auth-back" aria-label="Volver al inicio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <span>Volver al inicio</span>
+    </a>
     {% if messages %}
     <div class="messages messages--auth">
         {% for message in messages %}
