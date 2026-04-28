@@ -16,8 +16,7 @@
       <span class="pk-logo__text">PokeTrip</span>
     </a>
     <nav class="pk-nav">
-      <a href="#features" class="pk-nav__link">Funciones</a>
-      <a href="#flow" class="pk-nav__link">Cómo funciona</a>
+      <a href="#features" class="pk-nav__link">Qué incluye</a>
       <a href="{% url 'login' %}" class="pk-nav__link">Iniciar sesión</a>
       <a href="{% url 'register' %}" class="pk-btn pk-btn--primary pk-btn--sm">Crear cuenta</a>
     </nav>
@@ -25,157 +24,95 @@
 </header>
 
 <main>
-  <section class="pk-hero">
-    <div class="pk-container pk-hero__grid">
-      <div class="pk-hero__copy">
-        <span class="pk-eyebrow">Planificación colaborativa con datos reales</span>
-        <h1 class="pk-hero__title">Empieza el viaje <em>antes</em> de reservar nada.</h1>
-        <p class="pk-hero__lead">
-          Itinerario, gastos, documentos, reservas y miembros en un solo lugar.
-          Cada viaje incorpora información en vivo del destino para que decidas con contexto.
+  <section class="pk-overview">
+    <div class="pk-container pk-overview__grid">
+      <section class="pk-intro-card">
+        <span class="pk-eyebrow">Qué es PokeTrip</span>
+        <h1 class="pk-intro-card__title">Una app para tener cada viaje organizado en un solo sitio.</h1>
+        <p class="pk-intro-card__lead">
+          En vez de repartir todo entre notas, capturas, documentos y mensajes, PokeTrip junta
+          el viaje completo en una misma aplicación: fechas, itinerario, gastos, reservas, archivos
+          y la información del destino.
         </p>
-        <div class="pk-hero__actions">
-          <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Crear cuenta gratis</a>
-          <a href="{% url 'login' %}" class="pk-btn pk-btn--ghost">Ya tengo cuenta</a>
+        <div class="pk-intro-card__actions">
+          <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Crear cuenta</a>
+          <a href="{% url 'login' %}" class="pk-btn pk-btn--ghost">Iniciar sesión</a>
         </div>
-        <ul class="pk-hero__bullets">
-          <li>Itinerarios por días conectados con gastos y reservas.</li>
-          <li>Invita a otras personas y planifica en grupo.</li>
-          <li>Clima, moneda e idiomas del destino dentro del viaje.</li>
-        </ul>
-      </div>
+      </section>
 
-      <aside class="pk-hero__panel" aria-hidden="true">
-        <div class="pk-panel">
-          <div class="pk-panel__head">
-            <span class="pk-panel__dot"></span>
-            <span class="pk-panel__dot"></span>
-            <span class="pk-panel__dot"></span>
-            <span class="pk-panel__title">poketrip.es / viajes / Lisboa</span>
+      <aside class="pk-preview-card" aria-hidden="true">
+        <div class="pk-preview-card__head">
+          <strong>Vista general</strong>
+          <span>Lo que encontrarás dentro</span>
+        </div>
+        <div class="pk-preview-list">
+          <div class="pk-preview-item pk-preview-item--dark">
+            <span class="pk-preview-item__label">Dashboard</span>
+            <strong>Tus viajes y clima actual</strong>
+            <span class="pk-preview-item__meta">Resumen rápido al entrar</span>
           </div>
-          <div class="pk-panel__body">
-            <div class="pk-tile pk-tile--dark">
-              <span class="pk-tile__label">Destino en vivo</span>
-              <strong class="pk-tile__value">Lisboa · 🇵🇹</strong>
-              <span class="pk-tile__meta">22 °C · EUR · Portugués</span>
-            </div>
-            <div class="pk-tile">
-              <span class="pk-tile__label">Itinerario</span>
-              <strong class="pk-tile__value">5 días</strong>
-              <span class="pk-tile__meta">12 actividades</span>
-            </div>
-            <div class="pk-tile">
-              <span class="pk-tile__label">Gastos</span>
-              <strong class="pk-tile__value">€ 412</strong>
-              <span class="pk-tile__meta">3 personas</span>
-            </div>
-            <div class="pk-tile">
-              <span class="pk-tile__label">Documentos</span>
-              <strong class="pk-tile__value">7</strong>
-              <span class="pk-tile__meta">Reservas y vuelos</span>
-            </div>
+          <div class="pk-preview-item">
+            <span class="pk-preview-item__label">Viajes</span>
+            <strong>Destino, fechas y miembros</strong>
+          </div>
+          <div class="pk-preview-item">
+            <span class="pk-preview-item__label">Itinerario</span>
+            <strong>Días y actividades</strong>
+          </div>
+          <div class="pk-preview-item">
+            <span class="pk-preview-item__label">Gastos</span>
+            <strong>Control por viaje</strong>
+          </div>
+          <div class="pk-preview-item">
+            <span class="pk-preview-item__label">Destino</span>
+            <strong>APIs externas integradas</strong>
           </div>
         </div>
       </aside>
     </div>
   </section>
 
-  <section class="pk-strip">
-    <div class="pk-container pk-strip__inner">
-      <div class="pk-strip__item"><strong>+5</strong><span>módulos conectados</span></div>
-      <div class="pk-strip__item"><strong>3 APIs</strong><span>externas en tiempo real</span></div>
-      <div class="pk-strip__item"><strong>100%</strong><span>responsive y accesible</span></div>
-      <div class="pk-strip__item"><strong>0 €</strong><span>para empezar a planificar</span></div>
-    </div>
-  </section>
-
   <section id="features" class="pk-section">
     <div class="pk-container">
       <header class="pk-section__head">
-        <span class="pk-eyebrow">Funciones</span>
-        <h2 class="pk-section__title">Todo lo que necesita un viaje, sin saltar entre apps.</h2>
+        <span class="pk-eyebrow">Qué hay dentro</span>
+        <h2 class="pk-section__title">Pantallas y módulos principales.</h2>
         <p class="pk-section__lead">
-          PokeTrip reúne las piezas operativas y las conecta entre sí.
-          Lo que cambias en un módulo se refleja en el resto.
+          El home sirve como resumen de lo que luego aparece dentro de la aplicación una vez inicias sesión.
         </p>
       </header>
 
       <div class="pk-grid pk-grid--features">
         <article class="pk-card">
-          <div class="pk-card__icon">📍</div>
-          <h3 class="pk-card__title">Itinerario por días</h3>
-          <p class="pk-card__text">Crea días, añade actividades y obtén sugerencias generadas con IA.</p>
+          <span class="pk-card__kicker">Dashboard</span>
+          <h3 class="pk-card__title">Resumen de viajes</h3>
+          <p class="pk-card__text">Muestra los viajes del usuario y un chip con el clima actual de cada destino.</p>
         </article>
         <article class="pk-card">
-          <div class="pk-card__icon">🌦️</div>
-          <h3 class="pk-card__title">Datos en vivo del destino</h3>
-          <p class="pk-card__text">Clima (Open-Meteo), país e idiomas (REST Countries) y tipo de cambio (Frankfurter), integrados dentro del viaje.</p>
+          <span class="pk-card__kicker">Viajes</span>
+          <h3 class="pk-card__title">Información base</h3>
+          <p class="pk-card__text">Cada viaje guarda destino, fechas, presupuesto, moneda y miembros invitados.</p>
         </article>
         <article class="pk-card">
-          <div class="pk-card__icon">💸</div>
-          <h3 class="pk-card__title">Gastos compartidos</h3>
-          <p class="pk-card__text">Registra gastos por viaje y consulta una vista global con totales.</p>
+          <span class="pk-card__kicker">Itinerario</span>
+          <h3 class="pk-card__title">Plan diario</h3>
+          <p class="pk-card__text">Los días se generan automáticamente y después se pueden completar con actividades.</p>
         </article>
         <article class="pk-card">
-          <div class="pk-card__icon">📄</div>
-          <h3 class="pk-card__title">Documentos y reservas</h3>
-          <p class="pk-card__text">Sube vuelos, hoteles y entradas. Cada archivo queda anclado a su viaje.</p>
+          <span class="pk-card__kicker">Gastos</span>
+          <h3 class="pk-card__title">Seguimiento económico</h3>
+          <p class="pk-card__text">Permite registrar gastos por viaje y consultarlos también desde una vista global.</p>
         </article>
         <article class="pk-card">
-          <div class="pk-card__icon">👥</div>
-          <h3 class="pk-card__title">Trabajo en grupo</h3>
-          <p class="pk-card__text">Invita a otras personas, asigna roles y planificad juntos sin salir de la app.</p>
+          <span class="pk-card__kicker">Documentos y reservas</span>
+          <h3 class="pk-card__title">Archivos del viaje</h3>
+          <p class="pk-card__text">Billetes, reservas de hotel y otros documentos quedan vinculados a cada viaje.</p>
         </article>
         <article class="pk-card">
-          <div class="pk-card__icon">📱</div>
-          <h3 class="pk-card__title">Móvil y escritorio</h3>
-          <p class="pk-card__text">Misma experiencia en cualquier dispositivo, con navegación inferior en móvil.</p>
+          <span class="pk-card__kicker">APIs</span>
+          <h3 class="pk-card__title">Información del destino</h3>
+          <p class="pk-card__text">Open-Meteo, REST Countries y Frankfurter aportan clima, idioma, moneda y cambio.</p>
         </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="flow" class="pk-section pk-section--alt">
-    <div class="pk-container">
-      <header class="pk-section__head">
-        <span class="pk-eyebrow">Cómo funciona</span>
-        <h2 class="pk-section__title">De la idea inicial al plan cerrado, en cuatro pasos.</h2>
-      </header>
-
-      <ol class="pk-steps">
-        <li class="pk-step">
-          <span class="pk-step__num">01</span>
-          <h3 class="pk-step__title">Crea tu cuenta</h3>
-          <p class="pk-step__text">Regístrate y entra a tu panel personal con todos tus viajes.</p>
-        </li>
-        <li class="pk-step">
-          <span class="pk-step__num">02</span>
-          <h3 class="pk-step__title">Crea un viaje</h3>
-          <p class="pk-step__text">Define destino y fechas. PokeTrip prepara los días automáticamente.</p>
-        </li>
-        <li class="pk-step">
-          <span class="pk-step__num">03</span>
-          <h3 class="pk-step__title">Rellena los módulos</h3>
-          <p class="pk-step__text">Itinerario, gastos, documentos y reservas, conectados entre sí.</p>
-        </li>
-        <li class="pk-step">
-          <span class="pk-step__num">04</span>
-          <h3 class="pk-step__title">Consulta el destino en vivo</h3>
-          <p class="pk-step__text">Clima, moneda e idiomas se cargan al abrir el viaje.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="pk-cta">
-    <div class="pk-container pk-cta__inner">
-      <div>
-        <h2 class="pk-cta__title">¿Listo para tu próximo viaje?</h2>
-        <p class="pk-cta__text">Crea tu cuenta gratis y empieza a planificar en menos de un minuto.</p>
-      </div>
-      <div class="pk-cta__actions">
-        <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Crear cuenta</a>
-        <a href="{% url 'login' %}" class="pk-btn pk-btn--ghost-light">Iniciar sesión</a>
       </div>
     </div>
   </section>
