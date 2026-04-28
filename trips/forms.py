@@ -38,6 +38,22 @@ class DocumentForm(forms.ModelForm):
 
 
 class ExpenseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.trip = kwargs.pop('trip', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_date(self):
+        expense_date = self.cleaned_data.get('date')
+        if not self.trip or not expense_date:
+            return expense_date
+
+        if expense_date < self.trip.start_date or expense_date > self.trip.end_date:
+            raise forms.ValidationError(
+                'La fecha del gasto debe estar dentro de las fechas del viaje.'
+            )
+
+        return expense_date
+
     class Meta:
         model = Expense
         fields = ['concept', 'amount', 'category', 'currency', 'date', 'notes']
@@ -48,6 +64,27 @@ class ExpenseForm(forms.ModelForm):
 
 
 class ReservationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.trip = kwargs.pop('trip', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError('La fecha de fin de la reserva no puede ser anterior a la de inicio.')
+
+        if self.trip:
+            for field_name, value in [('start_date', start_date), ('end_date', end_date)]:
+                if value and (value < self.trip.start_date or value > self.trip.end_date):
+                    raise forms.ValidationError(
+                        'Las fechas de la reserva deben estar dentro de las fechas del viaje.'
+                    )
+
+        return cleaned_data
+
     class Meta:
         model = Reservation
         fields = ['reservation_type', 'provider', 'locator', 'start_date', 'end_date', 'notes']

@@ -37,6 +37,8 @@ def _sync_trip_days(trip):
     if not trip.start_date or not trip.end_date:
         return trip.days.none()
 
+    trip.days.exclude(date__range=(trip.start_date, trip.end_date)).delete()
+
     current = trip.start_date
     idx = 1
     while current <= trip.end_date:
@@ -52,6 +54,12 @@ def _sync_trip_days(trip):
         idx += 1
 
     return trip.days.prefetch_related('items').order_by('day_index')
+
+
+def _add_form_error_messages(request, form):
+    for errors in form.errors.values():
+        for error in errors:
+            messages.error(request, error)
 
 
 @login_required
@@ -238,6 +246,17 @@ def document_delete(request, trip_pk, doc_pk):
 
 # Gastos
 
+def _get_budget_warning(trip):
+    if not trip.budget:
+        return None
+
+    total_spent = trip.expenses.aggregate(total=Sum('amount'))['total'] or 0
+    if total_spent <= trip.budget:
+        return None
+
+    over_budget = total_spent - trip.budget
+    return f'Has superado el presupuesto de este viaje por {over_budget:.2f} {trip.currency}.'
+
 @login_required
 def expenses_global(request):
     """Página global de gastos: muestra todos los gastos del usuario agrupados por viaje."""
@@ -248,15 +267,20 @@ def expenses_global(request):
     user_trips = (owned | shared).distinct().order_by('-start_date')
 
     if request.method == 'POST':
-        form = ExpenseForm(request.POST)
         trip_pk = request.POST.get('trip_id')
         trip = get_object_or_404(Trip, pk=trip_pk)
+        form = ExpenseForm(request.POST, trip=trip)
         if _check_trip_access(request, trip) and form.is_valid():
             expense = form.save(commit=False)
             expense.trip = trip
             expense.paid_by = request.user
             expense.save()
             messages.success(request, 'Gasto añadido.')
+            budget_warning = _get_budget_warning(trip)
+            if budget_warning:
+                messages.warning(request, budget_warning)
+        elif _check_trip_access(request, trip):
+            _add_form_error_messages(request, form)
         return redirect('expenses_global')
 
     q = request.GET.get('q', '').strip()
@@ -284,16 +308,20 @@ def expense_list(request, trip_pk):
     expenses = trip.expenses.select_related('paid_by').order_by('-date')
     total = expenses.aggregate(total=Sum('amount'))['total'] or 0
 
-    form = ExpenseForm()
+    form = ExpenseForm(trip=trip)
     if request.method == 'POST':
-        form = ExpenseForm(request.POST)
+        form = ExpenseForm(request.POST, trip=trip)
         if form.is_valid():
             expense = form.save(commit=False)
             expense.trip = trip
             expense.paid_by = request.user
             expense.save()
             messages.success(request, 'Gasto añadido.')
+            budget_warning = _get_budget_warning(trip)
+            if budget_warning:
+                messages.warning(request, budget_warning)
             return redirect('expense_list', trip_pk=trip.pk)
+        _add_form_error_messages(request, form)
 
     return render(request, 'trips/expense_list.html', {
         'trip': trip,
@@ -399,16 +427,17 @@ def reservation_list(request, trip_pk):
         return redirect('trip_list')
 
     reservations = trip.reservations.order_by('start_date')
-    form = ReservationForm()
+    form = ReservationForm(trip=trip)
 
     if request.method == 'POST':
-        form = ReservationForm(request.POST)
+        form = ReservationForm(request.POST, trip=trip)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation.trip = trip
             reservation.save()
             messages.success(request, 'Reserva añadida.')
             return redirect('reservation_list', trip_pk=trip.pk)
+        _add_form_error_messages(request, form)
 
     return render(request, 'trips/reservation_list.html', {
         'trip': trip,
