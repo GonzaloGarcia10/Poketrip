@@ -1299,10 +1299,10 @@ img { display: block; max-width: 100%; }
 .trip-live-weather__label {
     display: block;
     margin-bottom: 4px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
     color: #0f766e;
 }
 

@@ -127,16 +127,16 @@
       {% endif %}
     </div>
 
-    <div class="trip-section trip-section--wide trip-section--live"
-         data-destination="{{ trip.destination|escape }}"
-         data-currency="{{ trip.currency|default:'EUR'|escape }}">
-      <div class="trip-section__head trip-section__head--stacked">
-        <div>
-          <h2>Destino en tiempo real</h2>
-          <p class="trip-live__intro">Clima actual, moneda, idiomas, contexto del país y tipo de cambio actualizados desde APIs públicas.</p>
+      <div class="trip-section trip-section--wide trip-section--live"
+           data-destination="{{ trip.destination|escape }}"
+           data-currency="{{ trip.currency|default:'EUR'|escape }}">
+        <div class="trip-section__head trip-section__head--stacked">
+          <div>
+            <h2>Información del destino</h2>
+            <p class="trip-live__intro">Datos cargados en tiempo real desde APIs públicas al entrar al viaje.</p>
+          </div>
+          <span class="trip-live__badge">En directo</span>
         </div>
-        <span class="trip-live__badge">Ahora en directo</span>
-      </div>
       <div id="trip-live-panel" class="trip-live-panel">
         <p class="empty-hint">Cargando información del destino...</p>
       </div>
