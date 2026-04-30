@@ -1,7 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 from .models import Profile
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not User.objects.filter(email=email, is_active=True).exists():
+            raise forms.ValidationError('No existe ninguna cuenta registrada con ese correo.')
+        return email
 
 
 class RegisterForm(UserCreationForm):
