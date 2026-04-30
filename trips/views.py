@@ -537,7 +537,23 @@ def trip_invite(request, trip_pk):
                     'url': accept_url,
                     'trip_pk': trip.pk,
                 }
-                messages.success(request, f'Invitación creada para {email}. Comparte el enlace de abajo.')
+                # Enviar email de invitación
+                from django.core.mail import send_mail
+                from django.conf import settings as django_settings
+                send_mail(
+                    subject=f'Te han invitado al viaje "{trip.title}" en PokeTrip',
+                    message=(
+                        f'Hola,\n\n'
+                        f'{request.user.username} te ha invitado a unirte al viaje "{trip.title}" en PokeTrip.\n\n'
+                        f'Acepta la invitación haciendo clic en el siguiente enlace:\n{accept_url}\n\n'
+                        f'Este enlace expirará en 7 días.\n\n'
+                        f'— El equipo de PokeTrip'
+                    ),
+                    from_email=django_settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=True,
+                )
+                messages.success(request, f'Invitación enviada a {email}.')
     return redirect('trip_detail', pk=trip.pk)
 
 
