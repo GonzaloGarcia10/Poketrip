@@ -16,10 +16,12 @@ urlpatterns = [
     path('<int:trip_pk>/documents/<int:doc_pk>/delete/', views.document_delete, name='document_delete'),
     # Gastos
     path('<int:trip_pk>/expenses/', views.expense_list, name='expense_list'),
+    path('<int:trip_pk>/expenses/<int:expense_pk>/edit/', views.expense_edit, name='expense_edit'),
     path('<int:trip_pk>/expenses/<int:expense_pk>/delete/', views.expense_delete, name='expense_delete'),
     # Itinerario
     path('<int:trip_pk>/itinerary/', views.itinerary, name='itinerary'),
     path('<int:trip_pk>/itinerary/<int:day_pk>/add/', views.itinerary_item_create, name='itinerary_item_create'),
+    path('<int:trip_pk>/itinerary/item/<int:item_pk>/edit/', views.itinerary_item_edit, name='itinerary_item_edit'),
     path('<int:trip_pk>/itinerary/item/<int:item_pk>/delete/', views.itinerary_item_delete, name='itinerary_item_delete'),
     # Reservas
     path('<int:trip_pk>/reservations/', views.reservation_list, name='reservation_list'),

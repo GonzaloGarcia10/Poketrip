@@ -332,6 +332,26 @@ def expense_list(request, trip_pk):
 
 
 @login_required
+def expense_edit(request, trip_pk, expense_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    expense = get_object_or_404(Expense, pk=expense_pk, trip=trip)
+    if expense.paid_by != request.user and trip.owner != request.user:
+        messages.error(request, 'No puedes editar este gasto.')
+        return redirect('expense_list', trip_pk=trip.pk)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense, trip=trip)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gasto actualizado.')
+            budget_warning = _get_budget_warning(trip)
+            if budget_warning:
+                messages.warning(request, budget_warning)
+        else:
+            _add_form_error_messages(request, form)
+    return redirect('expense_list', trip_pk=trip.pk)
+
+
+@login_required
 def expense_delete(request, trip_pk, expense_pk):
     trip = get_object_or_404(Trip, pk=trip_pk)
     expense = get_object_or_404(Expense, pk=expense_pk, trip=trip)
@@ -402,6 +422,31 @@ def itinerary_item_create(request, trip_pk, day_pk):
                 description=description,
             )
             messages.success(request, 'Actividad añadida.')
+    return redirect('itinerary', trip_pk=trip.pk)
+
+
+@login_required
+def itinerary_item_edit(request, trip_pk, item_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    item = get_object_or_404(ItineraryItem, pk=item_pk, day__trip=trip)
+    if not _check_trip_access(request, trip):
+        return redirect('trip_list')
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        item_type = request.POST.get('item_type', item.item_type)
+        start_time = request.POST.get('start_time') or None
+        end_time = request.POST.get('end_time') or None
+        location = request.POST.get('location_text', '').strip()
+        description = request.POST.get('description', '').strip()
+        if title:
+            item.title = title
+            item.item_type = item_type
+            item.start_time = start_time
+            item.end_time = end_time
+            item.location_text = location
+            item.description = description
+            item.save()
+            messages.success(request, 'Actividad actualizada.')
     return redirect('itinerary', trip_pk=trip.pk)
 
 
