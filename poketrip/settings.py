@@ -133,8 +133,19 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/trips/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# Email — en desarrollo imprime los emails en la consola
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email — usa Resend SMTP si hay API key, si no imprime en consola (desarrollo)
+RESEND_API_KEY = config('RESEND_API_KEY', default='')
+if RESEND_API_KEY:
+    EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST       = 'smtp.resend.com'
+    EMAIL_PORT       = 587
+    EMAIL_USE_TLS    = True
+    EMAIL_HOST_USER  = 'resend'
+    EMAIL_HOST_PASSWORD = RESEND_API_KEY
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@poketrip.app')
 
 # OpenAI
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
