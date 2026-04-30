@@ -513,9 +513,14 @@ def trip_invite(request, trip_pk):
         form = InviteForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-            # Evitar invitar al owner o a alguien ya invitado
+            # Evitar invitar al owner o a alguien ya miembro/invitado
+            already_member = TripMembership.objects.filter(
+                trip=trip, user__email=email, status='accepted'
+            ).exists()
             if email == request.user.email:
                 messages.error(request, 'No puedes invitarte a ti mismo.')
+            elif already_member:
+                messages.warning(request, f'{email} ya es miembro de este viaje.')
             elif TripMembership.objects.filter(trip=trip, invited_email=email).exists():
                 messages.warning(request, f'{email} ya ha sido invitado.')
             else:
@@ -569,6 +574,14 @@ def trip_accept_invite(request, token):
     if not request.user.is_authenticated:
         request.session['pending_invite_token'] = token
         return redirect(f'/accounts/login/?next=/trips/invite/{token}/accept/')
+
+    if membership.trip.owner == request.user:
+        messages.error(request, 'Eres el propietario de este viaje, no necesitas unirte.')
+        return redirect('trip_detail', pk=membership.trip.pk)
+
+    if TripMembership.objects.filter(trip=membership.trip, user=request.user, status='accepted').exists():
+        messages.warning(request, 'Ya eres miembro de este viaje.')
+        return redirect('trip_detail', pk=membership.trip.pk)
 
     membership.user = request.user
     membership.status = 'accepted'
