@@ -146,6 +146,8 @@ else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@poketrip.app')
+SITE_DOMAIN   = config('SITE_DOMAIN', default='localhost:8000')
+SITE_PROTOCOL = config('SITE_PROTOCOL', default='http')
 
 # OpenAI
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')

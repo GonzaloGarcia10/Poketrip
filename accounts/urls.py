@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.conf import settings
 from . import views
 from .forms import CustomPasswordResetForm
 
@@ -15,6 +16,10 @@ urlpatterns = [
             email_template_name='accounts/password_reset_email.txt',
             subject_template_name='accounts/password_reset_subject.txt',
             form_class=CustomPasswordResetForm,
+            extra_email_context={
+                'domain': settings.SITE_DOMAIN,
+                'protocol': settings.SITE_PROTOCOL,
+            },
             success_url='/accounts/password-reset/done/',
         ),
         name='password_reset'),
