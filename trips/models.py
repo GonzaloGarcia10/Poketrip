@@ -137,6 +137,7 @@ class Expense(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='EUR')
     date = models.DateField()
+    date_end = models.DateField(blank=True, null=True)
     notes = models.TextField(blank=True)
 
     class Meta:
