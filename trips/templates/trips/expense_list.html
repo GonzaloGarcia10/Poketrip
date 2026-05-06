@@ -35,7 +35,7 @@
         </div>
         <div class="doc-item__info">
           <span class="doc-item__name">{{ expense.concept }}</span>
-          <span class="doc-item__meta">{{ expense.get_category_display }} · {{ expense.paid_by.username }} · {{ expense.date|date:"d/m/Y" }}</span>
+          <span class="doc-item__meta">{{ expense.get_category_display }} · {{ expense.paid_by.username }} · {{ expense.date|date:"d/m/Y" }}{% if expense.date_end %} → {{ expense.date_end|date:"d/m/Y" }}{% endif %}</span>
         </div>
         <span class="expense-amount">{{ expense.amount|floatformat:2 }} {{ expense.currency }}</span>
         {% if expense.paid_by == request.user or trip.owner == request.user %}
@@ -47,6 +47,7 @@
             data-category="{{ expense.category }}"
             data-currency="{{ expense.currency }}"
             data-date="{{ expense.date|date:'Y-m-d' }}"
+            data-date-end="{{ expense.date_end|date:'Y-m-d' }}"
             data-notes="{{ expense.notes }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -105,8 +106,12 @@
           </select>
         </div>
         <div class="form-field">
-          <label class="form-label">Fecha</label>
+          <label class="form-label">Fecha de inicio</label>
           <input type="date" name="date" class="form-input" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Fecha de fin <span style="font-weight:400;color:var(--gray-400)">(opcional)</span></label>
+          <input type="date" name="date_end" class="form-input">
         </div>
         <div class="form-field" style="grid-column:1/-1;">
           <label class="form-label">Notas (opcional)</label>
@@ -167,8 +172,12 @@
             </select>
           </div>
           <div class="form-field">
-            <label class="form-label">Fecha</label>
+            <label class="form-label">Fecha de inicio</label>
             <input type="date" name="date" id="edit-date" class="form-input" required>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Fecha de fin <span style="font-weight:400;color:var(--gray-400)">(opcional)</span></label>
+            <input type="date" name="date_end" id="edit-date-end" class="form-input">
           </div>
           <div class="form-field" style="grid-column:1/-1;">
             <label class="form-label">Notas (opcional)</label>
@@ -196,6 +205,7 @@ document.querySelectorAll('.js-expense-edit').forEach(function (btn) {
     document.getElementById('edit-category').value = d.category;
     document.getElementById('edit-currency').value = d.currency;
     document.getElementById('edit-date').value = d.date;
+    document.getElementById('edit-date-end').value = d.dateEnd || '';
     document.getElementById('edit-notes').value = d.notes;
     document.getElementById('expense-edit-modal').style.display = 'flex';
   });

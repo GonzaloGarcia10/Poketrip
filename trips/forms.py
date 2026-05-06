@@ -54,11 +54,20 @@ class ExpenseForm(forms.ModelForm):
 
         return expense_date
 
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        date_end = cleaned_data.get('date_end')
+        if date and date_end and date_end < date:
+            self.add_error('date_end', 'La fecha de fin no puede ser anterior a la fecha de inicio.')
+        return cleaned_data
+
     class Meta:
         model = Expense
-        fields = ['concept', 'amount', 'category', 'currency', 'date', 'notes']
+        fields = ['concept', 'amount', 'category', 'currency', 'date', 'date_end', 'notes']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
+            'date_end': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 2}),
         }
 
