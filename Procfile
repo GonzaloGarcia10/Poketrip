@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn poketrip.wsgi --log-file -
+web: sh -c 'python manage.py migrate --noinput && python manage.py collectstatic --noinput && exec gunicorn poketrip.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-3} --log-file -'
