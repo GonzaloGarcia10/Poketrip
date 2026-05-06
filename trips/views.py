@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -9,6 +10,25 @@ import json
 
 from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay, Reservation
 from .forms import TripForm, DocumentForm, ExpenseForm, ReservationForm, InviteForm
+
+
+def _build_trip_summary(trip, *, expenses=None, reservations=None, documents=None, members=None):
+    expense_items = list(expenses if expenses is not None else trip.expenses.only('amount'))
+    reservation_items = list(reservations if reservations is not None else trip.reservations.only('id'))
+    document_items = list(documents if documents is not None else trip.documents.only('id'))
+    member_items = list(
+        members if members is not None else TripMembership.objects.filter(trip=trip, status='accepted').only('id')
+    )
+    total_spent = sum((expense.amount for expense in expense_items), Decimal('0'))
+
+    return [
+        {'label': 'Días', 'value': (trip.end_date - trip.start_date).days + 1, 'detail': 'duración total'},
+        {'label': 'Gastos', 'value': len(expense_items), 'detail': 'gastos registrados'},
+        {'label': 'Total gastado', 'value': f'{total_spent:.2f} {trip.currency}', 'detail': 'importe acumulado'},
+        {'label': 'Reservas', 'value': len(reservation_items), 'detail': 'reservas guardadas'},
+        {'label': 'Documentos', 'value': len(document_items), 'detail': 'archivos subidos'},
+        {'label': 'Miembros', 'value': len(member_items), 'detail': 'miembros con acceso'},
+    ]
 
 
 @login_required
@@ -96,7 +116,8 @@ def trip_detail(request, pk):
     role = 'owner' if is_owner else TripMembership.objects.get(
         trip=trip, user=request.user, status='accepted'
     ).role
-    members = TripMembership.objects.filter(trip=trip, status='accepted').select_related('user')
+    members = list(TripMembership.objects.filter(trip=trip, status='accepted').select_related('user'))
+    trip_summary = _build_trip_summary(trip, members=members)
 
     # Mostrar enlace de la ultima invitación creada en este viaje (una sola vez)
     last_invite = None
@@ -109,6 +130,7 @@ def trip_detail(request, pk):
         'trip': trip,
         'role': role,
         'members': members,
+        'trip_summary': trip_summary,
         'last_invite': last_invite,
     })
 
