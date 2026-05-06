@@ -9,6 +9,120 @@
 <span class="role-badge role-badge--{{ role }}">{{ role }}</span>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+  .trip-summary {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .trip-summary__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .trip-summary__eyebrow {
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+  }
+
+  .trip-summary__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--black);
+  }
+
+  .trip-summary__copy {
+    color: var(--gray-600);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    max-width: 60ch;
+  }
+
+  .trip-summary__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .trip-summary__metric {
+    display: grid;
+    gap: 4px;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-100);
+    background: var(--white);
+    box-shadow: none;
+  }
+
+  .trip-summary__metric::before {
+    content: none;
+  }
+
+  .trip-summary__metric dt {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+  }
+
+  .trip-summary__metric dd {
+    margin: 0;
+  }
+
+  .trip-summary__value {
+    font-size: 1.28rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--black);
+    overflow-wrap: anywhere;
+  }
+
+  .trip-summary__detail {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--gray-400);
+  }
+
+  @media (max-width: 720px) {
+    .trip-summary__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .trip-summary__intro,
+    .trip-summary__metric {
+      padding: 16px;
+    }
+
+    .trip-summary__metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .trip-summary__title {
+      font-size: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="trip-detail">
 
@@ -31,6 +145,24 @@
     </div>
     {% endif %}
   </div>
+
+  <!-- Resumen rápido -->
+  <section class="trip-summary" aria-labelledby="trip-summary-title" aria-describedby="trip-summary-copy">
+    <header class="trip-summary__intro">
+      <span class="trip-summary__eyebrow">Resumen rápido</span>
+      <h2 id="trip-summary-title" class="trip-summary__title">Todo lo importante, en un vistazo.</h2>
+      <p id="trip-summary-copy" class="trip-summary__copy">Duración, gasto y actividad del viaje de un vistazo.</p>
+    </header>
+    <dl class="trip-summary__metrics">
+      {% for item in trip_summary %}
+      <div class="trip-summary__metric">
+        <dt>{{ item.label }}</dt>
+        <dd class="trip-summary__value">{{ item.value }}</dd>
+        <dd class="trip-summary__detail">{{ item.detail }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </section>
 
   <!-- Secciones -->
   <div class="trip-sections">
