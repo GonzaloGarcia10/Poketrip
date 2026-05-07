@@ -8,7 +8,7 @@ from django.http import JsonResponse
 import os
 import json
 
-from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay, Reservation
+from .models import Trip, TripMembership, Document, Expense, ItineraryItem, TripDay, Reservation, AIGeneration
 from .forms import TripForm, DocumentForm, ExpenseForm, ReservationForm, InviteForm
 
 
@@ -765,6 +765,17 @@ Para preguntas generales responde solo en texto sin JSON."""
                 reply = reply[:json_match.start()].strip()
             except Exception:
                 pass
+
+        AIGeneration.objects.create(
+            trip=trip,
+            parameters={
+                'model': 'gpt-4o-mini',
+                'has_image': bool(image_base64),
+                'history_length': len(history),
+            },
+            prompt=message,
+            response={'reply': reply, 'items': items},
+        )
 
         return JsonResponse({'reply': reply, 'items': items})
 
