@@ -5,8 +5,33 @@
 {% block nav_itinerary %}active{% endblock %}
 {% block bnav_itinerary %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+  .iday__weather {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    opacity: 0;
+  }
+  .iday__weather--loaded { opacity: 1; }
+  .iday__weather strong { color: var(--black); font-weight: 700; }
+  .iday__weather--na { opacity: 0.45; font-size: 0.72rem; border-style: dashed; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="itinerary-page">
+<div class="itinerary-page" data-destination="{{ trip.destination|escape }}">
 
   <div class="expenses-header">
     <div>
@@ -19,13 +44,14 @@
   {% if days %}
   <div class="itinerary-days">
     {% for day in days %}
-    <div class="iday">
+    <div class="iday" data-date="{{ day.date|date:'Y-m-d' }}">
       <div class="iday__header">
         <div class="iday__dot"></div>
         <div>
           <span class="iday__label">Día {{ day.day_index }}</span>
           <span class="iday__date">{{ day.date|date:"l, d M Y" }}</span>
         </div>
+        <span class="iday__weather" id="weather-{{ day.date|date:'Y-m-d' }}"></span>
       </div>
 
       <div class="iday__body">
@@ -172,6 +198,92 @@
 
 {% block extra_js %}
 <script>
+/* ── Itinerary weather forecast (Open-Meteo) ── */
+(async function () {
+  const page = document.querySelector('.itinerary-page[data-destination]');
+  const destination = (page?.dataset.destination || '').trim();
+  if (!destination) return;
+
+  const days = document.querySelectorAll('.iday[data-date]');
+  if (!days.length) return;
+
+  // Geocode destination
+  let loc;
+  try {
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(destination)}&count=1&language=es&format=json`);
+    if (!r.ok) return;
+    const d = await r.json();
+    loc = d.results?.[0];
+  } catch (_) { return; }
+  if (!loc) return;
+
+  const dates = [...days].map(d => d.dataset.date).sort();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const maxForecast = new Date(today); maxForecast.setDate(today.getDate() + 15);
+  const maxForecastStr = maxForecast.toISOString().slice(0, 10);
+  const archiveCutoff = new Date(today); archiveCutoff.setDate(today.getDate() - 6);
+  const archiveCutoffStr = archiveCutoff.toISOString().slice(0, 10);
+
+  const archiveDates = dates.filter(d => d < archiveCutoffStr);
+  const foreDates    = dates.filter(d => d >= archiveCutoffStr && d <= maxForecastStr);
+  const farDates     = dates.filter(d => d > maxForecastStr);
+
+  const weatherMap = {};
+
+  function parseDaily(data) {
+    (data.daily?.time || []).forEach((date, i) => {
+      weatherMap[date] = {
+        code: data.daily.weather_code?.[i] ?? null,
+        max:  data.daily.temperature_2m_max?.[i] ?? null,
+        min:  data.daily.temperature_2m_min?.[i] ?? null,
+      };
+    });
+  }
+
+  const params = `daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`;
+  const base   = `latitude=${loc.latitude}&longitude=${loc.longitude}`;
+
+  await Promise.all([
+    archiveDates.length ? fetch(
+      `https://archive-api.open-meteo.com/v1/archive?${base}&start_date=${archiveDates[0]}&end_date=${archiveDates.at(-1)}&${params}`
+    ).then(r => r.ok ? r.json() : null).then(d => d && parseDaily(d)).catch(() => {}) : Promise.resolve(),
+
+    foreDates.length ? fetch(
+      `https://api.open-meteo.com/v1/forecast?${base}&start_date=${foreDates[0]}&end_date=${foreDates.at(-1)}&${params}`
+    ).then(r => r.ok ? r.json() : null).then(d => d && parseDaily(d)).catch(() => {}) : Promise.resolve(),
+  ]);
+
+  function weatherIcon(code) {
+    if (code === 0) return '☀️';
+    if ([1,2,3].includes(code)) return '⛅';
+    if ([45,48].includes(code)) return '🌫️';
+    if (code >= 51 && code <= 67) return '🌧️';
+    if (code >= 71 && code <= 77) return '❄️';
+    if (code >= 80 && code <= 82) return '🌦️';
+    if (code >= 95) return '⛈️';
+    return '🌡️';
+  }
+
+  days.forEach(day => {
+    const date = day.dataset.date;
+    const chip = document.getElementById(`weather-${date}`);
+    if (!chip) return;
+
+    if (farDates.includes(date)) {
+      chip.textContent = 'Previsión no disponible';
+      chip.classList.add('iday__weather--na', 'iday__weather--loaded');
+      return;
+    }
+
+    const w = weatherMap[date];
+    if (!w || w.max === null) return;
+
+    chip.innerHTML = `${weatherIcon(w.code)}&nbsp;<strong>${Math.round(w.max)}°</strong>&thinsp;/&thinsp;${Math.round(w.min)}°`;
+    chip.classList.add('iday__weather--loaded');
+  });
+})();
+
 document.querySelectorAll('.js-item-edit').forEach(function (btn) {
   btn.addEventListener('click', function () {
     var d = btn.dataset;
