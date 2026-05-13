@@ -1,3 +1,4 @@
+import os
 from django import forms
 from .models import Trip, TripMembership, Document, Expense, Reservation
 
@@ -32,6 +33,22 @@ class InviteForm(forms.Form):
 
 
 class DocumentForm(forms.ModelForm):
+    ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'}
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+    def clean_file(self):
+        f = self.cleaned_data.get('file')
+        if not f:
+            return f
+        ext = os.path.splitext(f.name)[1].lower()
+        if ext not in self.ALLOWED_EXTENSIONS:
+            raise forms.ValidationError(
+                'Formato no permitido. Solo se aceptan: PDF, DOC, DOCX, JPG, JPEG, PNG.'
+            )
+        if f.size > self.MAX_FILE_SIZE:
+            raise forms.ValidationError('El archivo no puede superar los 10 MB.')
+        return f
+
     class Meta:
         model = Document
         fields = ['name', 'file']
