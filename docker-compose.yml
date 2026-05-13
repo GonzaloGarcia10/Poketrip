@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - media_data:/app/media
+      - ./db.sqlite3:/app/db.sqlite3
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/accounts/login/"]
       interval: 30s
