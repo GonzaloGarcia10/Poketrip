@@ -25,6 +25,7 @@ urlpatterns = [
     path('<int:trip_pk>/itinerary/item/<int:item_pk>/delete/', views.itinerary_item_delete, name='itinerary_item_delete'),
     # Reservas
     path('<int:trip_pk>/reservations/', views.reservation_list, name='reservation_list'),
+    path('<int:trip_pk>/reservations/<int:reservation_pk>/edit/', views.reservation_edit, name='reservation_edit'),
     path('<int:trip_pk>/reservations/<int:reservation_pk>/delete/', views.reservation_delete, name='reservation_delete'),
     # Invitaciones
     path('<int:trip_pk>/invite/', views.trip_invite, name='trip_invite'),

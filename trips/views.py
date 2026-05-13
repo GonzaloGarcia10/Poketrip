@@ -514,6 +514,23 @@ def reservation_list(request, trip_pk):
 
 
 @login_required
+def reservation_edit(request, trip_pk, reservation_pk):
+    trip = get_object_or_404(Trip, pk=trip_pk)
+    reservation = get_object_or_404(Reservation, pk=reservation_pk, trip=trip)
+    if trip.owner != request.user and not _check_trip_access(request, trip):
+        messages.error(request, 'No tienes permiso.')
+        return redirect('reservation_list', trip_pk=trip.pk)
+    if request.method == 'POST':
+        form = ReservationForm(request.POST, instance=reservation, trip=trip)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Reserva actualizada.')
+        else:
+            _add_form_error_messages(request, form)
+    return redirect('reservation_list', trip_pk=trip.pk)
+
+
+@login_required
 def reservation_delete(request, trip_pk, reservation_pk):
     trip = get_object_or_404(Trip, pk=trip_pk)
     reservation = get_object_or_404(Reservation, pk=reservation_pk, trip=trip)
