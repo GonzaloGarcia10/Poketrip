@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /trips/
+Disallow: /accounts/profile/
+Disallow: /accounts/password-reset/
+Disallow: /admin/
+
+Sitemap: https://poketrip.es/sitemap.xml
