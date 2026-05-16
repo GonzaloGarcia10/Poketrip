@@ -38,7 +38,61 @@
     "author": {
       "@type": "Person",
       "name": "Gonzalo García Vega"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "12"
     }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿PokeTrip es gratis?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sí, PokeTrip es completamente gratuito. Puedes crear todos los viajes que quieras, gestionar gastos, subir documentos e invitar a otros usuarios sin coste."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Para qué sirve PokeTrip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "PokeTrip centraliza toda la información de tus viajes: itinerario por días, reservas de vuelos y alojamiento, documentos PDF, gastos y un asistente de IA que te ayuda a generar planes personalizados."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Puedo compartir un viaje con amigos o familia?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sí. Puedes invitar a otros usuarios por email y compartir el viaje completo: itinerario, reservas, documentos y gastos. Todos los miembros ven la misma información actualizada."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Cómo funciona el asistente IA de PokeTrip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "El asistente IA usa GPT-4 para generar propuestas de itinerario según el destino, las fechas y tus preferencias. Puedes pedirle ideas de actividades, restaurantes o rutas, y aplicarlas directamente al itinerario."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Necesito instalar algo para usar PokeTrip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. PokeTrip es una aplicación web, funciona desde cualquier navegador en ordenador o móvil. Solo necesitas crear una cuenta gratuita."
+        }
+      }
+    ]
   }
   </script>
 
@@ -64,15 +118,16 @@
   <section class="pk-overview">
     <div class="pk-container pk-overview__grid">
       <section class="pk-intro-card">
-        <span class="pk-eyebrow">Qué es PokeTrip</span>
-        <h1 class="pk-intro-card__title">Una app para tener cada viaje organizado en un solo sitio.</h1>
+        <span class="pk-eyebrow">Planificador de viajes gratuito con IA</span>
+        <h1 class="pk-intro-card__title">Planifica tu viaje completo: itinerario, gastos, reservas y documentos en un solo sitio.</h1>
         <p class="pk-intro-card__lead">
-          En vez de repartir todo entre notas, capturas, documentos y mensajes, PokeTrip junta
-          el viaje completo en una misma aplicación: fechas, itinerario, gastos, reservas, archivos
-          y la información del destino.
+          <strong>PokeTrip</strong> es la app gratuita para organizar tus viajes. Crea el itinerario día a día,
+          controla los gastos del viaje, guarda tus reservas y documentos, y deja que el asistente de
+          inteligencia artificial te ayude a planificar las actividades. Ideal para viajar solo, en pareja
+          o en grupo.
         </p>
         <div class="pk-intro-card__actions">
-          <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Crear cuenta</a>
+          <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Empezar gratis</a>
           <a href="{% url 'login' %}" class="pk-btn pk-btn--ghost">Iniciar sesión</a>
         </div>
       </section>
@@ -150,6 +205,98 @@
           <h3 class="pk-card__title">Información del destino</h3>
           <p class="pk-card__text">Open-Meteo, REST Countries y Frankfurter aportan clima, idioma, moneda y cambio.</p>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="pk-section">
+    <div class="pk-container">
+      <header class="pk-section__head">
+        <span class="pk-eyebrow">Cómo funciona</span>
+        <h2 class="pk-section__title">Organizar un viaje con PokeTrip en 3 pasos.</h2>
+        <p class="pk-section__lead">
+          Sin instalaciones, sin coste y desde cualquier dispositivo con navegador.
+        </p>
+      </header>
+
+      <div class="pk-grid pk-grid--features">
+        <article class="pk-card">
+          <span class="pk-card__kicker">Paso 1</span>
+          <h3 class="pk-card__title">Crea tu viaje</h3>
+          <p class="pk-card__text">Indica el destino, las fechas, el presupuesto y el estilo de viaje (cultural, aventura, playa…). PokeTrip generará automáticamente los días del viaje.</p>
+        </article>
+        <article class="pk-card">
+          <span class="pk-card__kicker">Paso 2</span>
+          <h3 class="pk-card__title">Añade itinerario, reservas y gastos</h3>
+          <p class="pk-card__text">Rellena cada día con actividades, sube las reservas de vuelos y hoteles, guarda documentos importantes y registra los gastos a medida que viajas.</p>
+        </article>
+        <article class="pk-card">
+          <span class="pk-card__kicker">Paso 3</span>
+          <h3 class="pk-card__title">Usa la IA o comparte con amigos</h3>
+          <p class="pk-card__text">Pide ayuda al asistente IA para generar un itinerario completo en segundos, o invita a tus compañeros de viaje para planificar y consultar todo juntos.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="para-quien" class="pk-section">
+    <div class="pk-container">
+      <header class="pk-section__head">
+        <span class="pk-eyebrow">Para quién es</span>
+        <h2 class="pk-section__title">El planificador ideal para cualquier tipo de viajero.</h2>
+      </header>
+
+      <div class="pk-grid pk-grid--features">
+        <article class="pk-card">
+          <h3 class="pk-card__title">Viajeros frecuentes</h3>
+          <p class="pk-card__text">Gestiona múltiples viajes a la vez y consulta el historial completo de cada uno: documentos, gastos y rutas.</p>
+        </article>
+        <article class="pk-card">
+          <h3 class="pk-card__title">Grupos de amigos y familias</h3>
+          <p class="pk-card__text">Invita a otras personas al viaje y planificad juntos el itinerario, controlad los gastos compartidos y acceded a las reservas en tiempo real.</p>
+        </article>
+        <article class="pk-card">
+          <h3 class="pk-card__title">Viajeros con presupuesto ajustado</h3>
+          <p class="pk-card__text">Define un presupuesto al crear el viaje y registra los gastos por categorías (transporte, alojamiento, comida…) para no pasarte.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="pk-section">
+    <div class="pk-container">
+      <header class="pk-section__head">
+        <span class="pk-eyebrow">Preguntas frecuentes</span>
+        <h2 class="pk-section__title">Dudas habituales sobre PokeTrip.</h2>
+      </header>
+
+      <div class="pk-faq">
+        <details class="pk-faq__item">
+          <summary class="pk-faq__q">¿PokeTrip es gratis?</summary>
+          <p class="pk-faq__a">Sí, PokeTrip es completamente gratuito. Puedes crear todos los viajes que quieras, gestionar gastos, subir documentos e invitar a otros usuarios sin coste.</p>
+        </details>
+        <details class="pk-faq__item">
+          <summary class="pk-faq__q">¿Para qué sirve PokeTrip?</summary>
+          <p class="pk-faq__a">PokeTrip centraliza toda la información de tus viajes: itinerario por días, reservas de vuelos y alojamiento, documentos PDF, gastos y un asistente de IA que te ayuda a generar planes personalizados.</p>
+        </details>
+        <details class="pk-faq__item">
+          <summary class="pk-faq__q">¿Puedo compartir un viaje con amigos o familia?</summary>
+          <p class="pk-faq__a">Sí. Puedes invitar a otros usuarios por email y compartir el viaje completo: itinerario, reservas, documentos y gastos. Todos los miembros ven la misma información actualizada.</p>
+        </details>
+        <details class="pk-faq__item">
+          <summary class="pk-faq__q">¿Cómo funciona el asistente IA de PokeTrip?</summary>
+          <p class="pk-faq__a">El asistente IA usa GPT-4 para generar propuestas de itinerario según el destino, las fechas y tus preferencias. Puedes pedirle ideas de actividades, restaurantes o rutas, y aplicarlas directamente al itinerario con un clic.</p>
+        </details>
+        <details class="pk-faq__item">
+          <summary class="pk-faq__q">¿Necesito instalar algo para usar PokeTrip?</summary>
+          <p class="pk-faq__a">No. PokeTrip es una aplicación web, funciona desde cualquier navegador en ordenador o móvil. Solo necesitas crear una cuenta gratuita y empezar a planificar.</p>
+        </details>
+      </div>
+
+      <div class="pk-cta">
+        <h2 class="pk-cta__title">Empieza a planificar tu próximo viaje hoy</h2>
+        <p class="pk-cta__text">Crea una cuenta gratis y organiza tu viaje en minutos.</p>
+        <a href="{% url 'register' %}" class="pk-btn pk-btn--primary">Crear cuenta gratis</a>
       </div>
     </div>
   </section>
