@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  /* ── Utilidades ────────────────────────────────────────── */
+  /* Utilidades */
   function showError(input, msg) {
     clearError(input);
     input.classList.add('form-input--error', 'auth-input--error');
@@ -80,7 +80,7 @@
     return true;
   }
 
-  /* ── Inicialización ────────────────────────────────────── */
+  /* Inicialización */
   document.addEventListener('DOMContentLoaded', function () {
     // Aplica a todos los formularios de la página
     document.querySelectorAll('form').forEach(function (form) {
@@ -115,7 +115,7 @@
       });
     });
 
-    /* ── Toggle mostrar/ocultar contraseña ─────────────────── */
+    /* Toggle mostrar/ocultar contraseña */
     document.querySelectorAll('input[type="password"]').forEach(function (input) {
       var wrapper = document.createElement('div');
       wrapper.style.cssText = 'position:relative;display:block;';
