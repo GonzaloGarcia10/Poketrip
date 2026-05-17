@@ -66,9 +66,7 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <button class="back-btn" onclick="history.back()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
+            {% block back_btn %}{% endblock %}
             <span class="page-title-mobile">{% block page_title %}PokeTrip{% endblock %}</span>
             {% block role_badge %}{% endblock %}
         </header>
