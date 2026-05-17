@@ -1,31 +1,47 @@
 # PokeTrip
 
 PokeTrip es una aplicación web de planificación de viajes desarrollada con Django como proyecto final de DAW. La aplicación permite centralizar en un solo sitio la información principal de cada viaje: destino, fechas, itinerario, gastos, documentos, reservas y miembros invitados.
-
-Además de la gestión interna del viaje, el proyecto integra datos externos en tiempo real para enriquecer la experiencia del usuario, como el clima actual, información del país de destino y tipos de cambio de moneda.
-
 ## Objetivo del proyecto
+## Dependencias principales y para qué sirven
+
+Estas son las dependencias directas del proyecto (las que realmente usa PokeTrip):
+
+- `Django`: framework principal del backend y renderizado de plantillas.
+- `python-decouple`: carga variables de entorno desde `.env`.
+- `dj-database-url`: parsea `DATABASE_URL` para usar SQLite o PostgreSQL según entorno.
+- `psycopg2-binary`: driver de PostgreSQL en producción.
+- `gunicorn`: servidor WSGI para despliegue.
+- `whitenoise`: servicio de archivos estáticos en producción.
+- `Pillow`: gestión de imágenes (avatar de perfil).
+- `django-anymail`: integración de envío de email con Resend.
+- `openai`: cliente para el asistente IA del proyecto.
+- `requests`: cliente HTTP para integraciones externas.
+
+Dependencias como `anyio`, `httpx`, `pydantic`, `urllib3`, `sqlparse`, etc., son dependencias internas de las librerías principales y no se usan directamente en el código de negocio.
 
 El objetivo de PokeTrip es ofrecer una herramienta práctica para organizar viajes de forma clara y colaborativa. En lugar de repartir la información entre notas, correos, documentos y capturas, la aplicación reúne todo en una única plataforma accesible desde distintos dispositivos.
 
 ## Funcionalidades principales
-
-- Registro, inicio de sesión y gestión de perfil de usuario.
+git clone https://github.com/GonzaloGarcia10/Poketrip.git
+cd Poketrip
 - Creación y edición de viajes con destino, fechas, presupuesto, moneda y estilo de viaje.
 - Generación automática de los días del viaje a partir del rango de fechas.
 - Itinerario por días con actividades, transporte, comidas, alojamiento u otros elementos.
 - Gestión de gastos por viaje y vista global de control económico.
 - Subida y gestión de documentos vinculados a cada viaje.
+Copiar variables de entorno de ejemplo:
+
+```bash
+cp .env.example .env
+```
 - Registro de reservas, como vuelos, hoteles o actividades.
 - Sistema de invitaciones para compartir viajes con otros usuarios.
 - Información del destino obtenida desde APIs públicas.
 - Asistente de viaje con IA para sugerencias y apoyo a la planificación.
-- Interfaz responsive adaptada a escritorio y móvil.
-
-## Tecnologías utilizadas
-
-### Backend
-
+- `RESEND_API_KEY`
+- `DEFAULT_FROM_EMAIL`
+- `SITE_DOMAIN`
+- `SITE_PROTOCOL`
 - Python 3
 - Django 4
 - Gunicorn como servidor WSGI en producción
@@ -36,6 +52,10 @@ El objetivo de PokeTrip es ofrecer una herramienta práctica para organizar viaj
 ### Base de datos
 
 - SQLite en desarrollo
+RESEND_API_KEY=
+DEFAULT_FROM_EMAIL=noreply@tudominio.com
+SITE_DOMAIN=localhost:8000
+SITE_PROTOCOL=http
 - PostgreSQL compatible en producción mediante `DATABASE_URL`
 
 ### Frontend
@@ -63,6 +83,10 @@ La entidad central del sistema es `Trip`, y a partir de ella se relacionan el re
 
 ## Módulos del proyecto
 
+Notas importantes:
+
+- En local usa `DEBUG=True` para evitar redirecciones HTTPS del bloque de seguridad de producción.
+- Si no defines `RESEND_API_KEY`, Django usará backend de consola para emails (útil en desarrollo).
 ### 1. Gestión de usuarios
 
 Incluye registro, inicio de sesión, cierre de sesión, recuperación de contraseña y edición del perfil. Cada usuario dispone de un perfil extendido con avatar y biografía.
