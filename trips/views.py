@@ -742,9 +742,72 @@ def api_ia_chat(request, trip_pk):
         client = OpenAI(api_key=api_key)
 
         total_days = (trip.end_date - trip.start_date).days + 1 if trip.start_date and trip.end_date else 7
+
+        # Build rich trip context 
+        # Itinerary
+        days_qs = trip.days.prefetch_related('items').order_by('day_index')
+        itinerary_lines = []
+        for day in days_qs:
+            items_for_day = day.items.all().order_by('start_time')
+            if items_for_day:
+                items_str = ', '.join(
+                    f"{it.start_time.strftime('%H:%M') if it.start_time else '?'} {it.title}"
+                    + (f" ({it.location_text})" if it.location_text else '')
+                    for it in items_for_day
+                )
+                itinerary_lines.append(f"  Día {day.day_index} ({day.date}): {items_str}")
+            else:
+                itinerary_lines.append(f"  Día {day.day_index} ({day.date}): sin actividades planificadas")
+        itinerary_block = '\n'.join(itinerary_lines) if itinerary_lines else '  (itinerario vacío)'
+
+        # Expenses
+        expenses_qs = trip.expenses.all().order_by('-date')
+        total_spent = sum(e.amount for e in expenses_qs)
+        expense_lines = [
+            f"  {e.date} | {e.get_category_display()} | {e.concept} | {e.amount} {e.currency}"
+            for e in expenses_qs
+        ]
+        expenses_block = '\n'.join(expense_lines) if expense_lines else '  (ningún gasto registrado)'
+        budget_info = f"{trip.budget} {trip.currency}" if trip.budget else 'no definido'
+        remaining = (trip.budget - total_spent) if trip.budget else None
+        remaining_str = f"{remaining:.2f} {trip.currency}" if remaining is not None else 'desconocido'
+
+        # Documents
+        docs_qs = trip.documents.all().order_by('-uploaded_at')
+        docs_block = '\n'.join(
+            f"  {d.name} (subido el {d.uploaded_at.strftime('%d/%m/%Y')})"
+            for d in docs_qs
+        ) if docs_qs else '  (ningún documento subido)'
+
+        # Reservations
+        reservations_qs = trip.reservations.all().order_by('start_date')
+        res_lines = [
+            f"  {r.get_reservation_type_display()} | {r.provider}"
+            + (f" | del {r.start_date} al {r.end_date}" if r.start_date else '')
+            + (f" | localizador: {r.locator}" if r.locator else '')
+            for r in reservations_qs
+        ]
+        reservations_block = '\n'.join(res_lines) if res_lines else '  (ninguna reserva guardada)'
+
         system_prompt = f"""Eres un asistente de viajes para PokeTrip, una app de planificación de viajes.
 El usuario planifica un viaje a {trip.destination} del {trip.start_date} al {trip.end_date} ({total_days} días).
-Estilo: {trip.travel_style or 'no especificado'}. Responde siempre en español, de forma amigable y breve.
+Estilo: {trip.travel_style or 'no especificado'}.
+
+A continuación tienes toda la información real del viaje. Úsala para responder con precisión:
+
+ITINERARIO ACTUAL:
+{itinerary_block}
+
+GASTOS REGISTRADOS (total gastado: {total_spent:.2f} {trip.currency} / presupuesto: {budget_info} / restante: {remaining_str}):
+{expenses_block}
+
+DOCUMENTOS SUBIDOS:
+{docs_block}
+
+RESERVAS:
+{reservations_block}
+
+Responde siempre en español, de forma amigable y breve. Cuando el usuario te pregunte sobre gastos, itinerario, documentos o reservas, usa los datos anteriores para dar respuestas precisas.
 
 Cuando el usuario pida un itinerario o actividades concretas, incluye AL FINAL de tu respuesta (sin texto después) este bloque JSON:
 ```json
