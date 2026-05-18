@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('accounts/', include('allauth.urls')),
     path('trips/', include('trips.urls')),
     path('', views.home, name='home'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
